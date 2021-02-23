@@ -35,7 +35,7 @@ public class InputListener implements KeyListener, WindowListener {
 
     @Override
     public void windowClosing(WindowEvent e) {
-        //do nothing
+        tetris.stop();
     }
 
     @Override

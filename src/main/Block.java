@@ -10,7 +10,7 @@ public class Block {
     private int rotation;
 
     private Block(int[][] points, float[] midPoint) {
-        yPos = 0;
+        yPos = 3; //TODO
         xPos = Tetris.BOARD_WIDTH / 2;
         rotation = 0;
         this.points = points;
@@ -65,9 +65,9 @@ public class Block {
     }
 
     public synchronized boolean moveDown(boolean[][] board) {
-        yPos--;
+        yPos++;
         if (overlaps(board)) {
-            yPos++;
+            yPos--;
             return false;
         }
         return true;
@@ -92,8 +92,6 @@ public class Block {
     }
 
     private boolean overlaps(boolean[][] board) {
-        boolean[][] overlay = getOverlay();
-
         for (int[] point : points) {
             int y = yPos - point[1];
             int x = xPos + point[0];
@@ -101,7 +99,7 @@ public class Block {
             if (y < 0 || y >= Tetris.BOARD_HEIGHT || x < 0 || x >= Tetris.BOARD_WIDTH)
                 return true;
 
-            if (overlay[y][x])
+            if(board[yPos - point[1]][xPos + point[0]])
                 return true;
         }
         return false;

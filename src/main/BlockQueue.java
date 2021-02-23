@@ -9,7 +9,7 @@ public class BlockQueue {
     private Random gen;
 
     public BlockQueue(int seed) {
-        Random gen = new Random(seed);
+        gen = new Random(seed);
         queue = new ArrayDeque<>(7);
         for (int i = 0; i < 6; i++) {
             queue.add(newBlock());

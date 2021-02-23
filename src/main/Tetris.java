@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 public class Tetris {
     public final static int BOARD_HEIGHT = 20;
     public final static int BOARD_WIDTH = 10;
-    private final InputListener inputListener;
     private final Output output;
     private final boolean[][] board = new boolean[BOARD_HEIGHT][BOARD_WIDTH];
     private int score;
@@ -23,7 +22,7 @@ public class Tetris {
             Arrays.fill(row, false);
         }
 
-        inputListener = new InputListener(this);
+        InputListener inputListener = new InputListener(this);
         output = new Output(board, inputListener);
         score = 0;
         blockQueue = new BlockQueue((int) (Math.random() * 1000));
@@ -90,11 +89,14 @@ public class Tetris {
     }
 
     public synchronized void resume() {
-        isPaused = false;
-        runTimedStep();
+        if(isPaused) {
+            isPaused = false;
+            runTimedStep();
+        }
     }
 
     public void stop() {
         timer.shutdownNow();
+        output.dispose();
     }
 }
