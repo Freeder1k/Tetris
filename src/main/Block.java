@@ -4,46 +4,45 @@ import java.util.Arrays;
 
 public class Block {
     private final int[][] points;
-    private final float[] midPoint;
+    private final int bBoxWidth;
     private int yPos;
     private int xPos;
     private int rotation;
 
-    private Block(int[][] points, float[] midPoint) {
-        yPos = 3; //TODO
-        xPos = Tetris.BOARD_WIDTH / 2;
+    private Block(int[][] points, int bBoxWidth) {
+        yPos = Tetris.BOARD_HEIGHT - bBoxWidth;
+        xPos = (Tetris.BOARD_WIDTH - bBoxWidth) / 2;
         rotation = 0;
         this.points = points;
-        this.midPoint = midPoint;
+        this.bBoxWidth = bBoxWidth;
     }
 
-    //TODO random rotation
     public static Block createSBlock() {
-        return new Block(new int[][]{{-1, 1}, {-1, 0}, {0, 0}, {0, -1}}, new float[]{0.0f, 0.0f});
+        return new Block(new int[][]{{0, 1}, {1, 1}, {1, 2}, {2, 2}}, 3);
     }
 
     public static Block createZBlock() {
-        return new Block(new int[][]{{1, 1}, {1, 0}, {0, 0}, {0, -1}}, new float[]{0.0f, 0.0f});
+        return new Block(new int[][]{{0, 2}, {1, 2}, {1, 1}, {2, 1}}, 3);
     }
 
     public static Block createCubeBlock() {
-        return new Block(new int[][]{{1, 1}, {1, 0}, {0, 0}, {0, 1}}, new float[]{0.5f, 0.5f});
+        return new Block(new int[][]{{0, 0}, {1, 0}, {0, 1}, {1, 1}}, 2);
     }
 
     public static Block createLBlock() {
-        return new Block(new int[][]{{1, 1}, {1, 0}, {0, 0}, {-1, 0}}, new float[]{0.0f, 0.0f});
+        return new Block(new int[][]{{0, 1}, {1, 1}, {2, 1}, {2, 2}}, 3);
     }
 
     public static Block createJBlock() {
-        return new Block(new int[][]{{1, 1}, {1, 0}, {0, 0}, {-1, 0}}, new float[]{0.0f, 0.0f});
+        return new Block(new int[][]{{0, 1}, {0, 2}, {1, 1}, {2, 1}}, 3);
     }
 
     public static Block createIBlock() {
-        return new Block(new int[][]{{-1, 0}, {1, 0}, {0, 0}, {2, 0}}, new float[]{0.5f, 0.5f});
+        return new Block(new int[][]{{0, 2}, {1, 2}, {2, 2}, {3, 2}}, 4);
     }
 
     public static Block createTBlock() {
-        return new Block(new int[][]{{0, 1}, {1, 0}, {0, 0}, {-1, 0}}, new float[]{0.0f, 0.0f});
+        return new Block(new int[][]{{0, 1}, {1, 1}, {1, 2}, {2, 1}}, 3);
     }
 
     public synchronized boolean rotate(boolean[][] board) {
@@ -53,8 +52,8 @@ public class Block {
             rotation++;
 
         for (int[] point : points) {
-            int xNew = Math.round(-((float) point[0] - midPoint[0]) + midPoint[1]);
-            int yNew = Math.round(((float) point[1] - midPoint[1]) + midPoint[0]);
+            int xNew = Math.round(-(((float) point[0]) - ((float) (bBoxWidth - 1)) / 2.0f) + (((float) (bBoxWidth - 1))) / 2.0f);
+            int yNew = Math.round((((float) point[1]) - ((float) (bBoxWidth - 1)) / 2.0f) + (((float) (bBoxWidth - 1))) / 2.0f);
             point[0] = yNew;
             point[1] = xNew;
         }
@@ -65,9 +64,9 @@ public class Block {
     }
 
     public synchronized boolean moveDown(boolean[][] board) {
-        yPos++;
+        yPos--;
         if (overlaps(board)) {
-            yPos--;
+            yPos++;
             return false;
         }
         return true;
@@ -93,14 +92,17 @@ public class Block {
 
     private boolean overlaps(boolean[][] board) {
         for (int[] point : points) {
-            int y = yPos - point[1];
+            int y = yPos + point[1];
             int x = xPos + point[0];
 
-            if (y < 0 || y >= Tetris.BOARD_HEIGHT || x < 0 || x >= Tetris.BOARD_WIDTH)
+            if (y < 0 || x < 0 || x >= Tetris.BOARD_WIDTH)
                 return true;
 
-            if(board[yPos - point[1]][xPos + point[0]])
-                return true;
+            if (y < Tetris.BOARD_HEIGHT) {
+                if (board[y][x]) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -113,15 +115,29 @@ public class Block {
         }
 
         for (int[] point : points) {
-            overlay[yPos - point[1]][xPos + point[0]] = true;
+            int y = yPos + point[1];
+            if (y < Tetris.BOARD_HEIGHT)
+                overlay[y][xPos + point[0]] = true;
         }
 
         return overlay;
     }
 
+    public synchronized boolean isOnTop() {
+        for (int[] point : points) {
+            int y = yPos + point[1];
+
+            if (y < Tetris.BOARD_HEIGHT - 2)
+                return false;
+        }
+        return true;
+    }
+
     public synchronized void addToBoard(boolean[][] board) {
         for (int[] point : points) {
-            board[yPos - point[1]][xPos + point[0]] = true;
+            int y = yPos + point[1];
+            if (y < Tetris.BOARD_HEIGHT)
+                board[yPos + point[1]][xPos + point[0]] = true;
         }
     }
 }

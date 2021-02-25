@@ -26,13 +26,13 @@ public class Output extends JFrame {
         scoreLabel = new JLabel("Score: 0", SwingConstants.CENTER);
         JPanel gamePanel = new JPanel();
 
-        gamePanel.setLayout(new java.awt.GridLayout(20, 10));
-        gamePanel.setPreferredSize(new Dimension(300, 600));
+        gamePanel.setLayout(new java.awt.GridLayout(Tetris.BOARD_HEIGHT-2, Tetris.BOARD_WIDTH));
+        gamePanel.setPreferredSize(new Dimension(Tetris.BOARD_WIDTH*30, (Tetris.BOARD_HEIGHT-2)*30));
         gamePanel.setMaximumSize(gamePanel.getPreferredSize());
         gamePanel.setMinimumSize(gamePanel.getPreferredSize());
 
         Border border = BorderFactory.createLineBorder(Color.gray);
-        for (int i1 = 0; i1 < 20; i1++) {
+        for (int i1 = Tetris.BOARD_HEIGHT-3; i1 >= 0; i1--) {
             for (int i2 = 0; i2 < 10; i2++) {
                 gameDisplay[i1][i2] = new JPanel();
                 gameDisplay[i1][i2].setBorder(border);
@@ -57,8 +57,8 @@ public class Output extends JFrame {
     public void updateOutput(Block activeBlock, int score) {
         boolean[][] blockOverlay = activeBlock.getOverlay();
 
-        for (int i1 = 0; i1 < 20; i1++) {
-            for (int i2 = 0; i2 < 10; i2++) {
+        for (int i1 = 0; i1 < Tetris.BOARD_HEIGHT-2; i1++) {
+            for (int i2 = 0; i2 < Tetris.BOARD_WIDTH; i2++) {
                 Color color = blockOverlay[i1][i2] ? Color.LIGHT_GRAY : (board[i1][i2] ? Color.WHITE : Color.BLACK);
                 gameDisplay[i1][i2].setBackground(color);
             }

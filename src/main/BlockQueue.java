@@ -27,6 +27,7 @@ public class BlockQueue {
      */
     public synchronized Block nextBlock() {
         queue.add(newBlock());
+        //TODO move new block down if possible
         return queue.remove();
     }
 
