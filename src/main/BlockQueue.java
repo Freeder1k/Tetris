@@ -6,7 +6,7 @@ import java.util.Random;
 public class BlockQueue {
     private final ArrayDeque<Block> queue;
 
-    private Random gen;
+    private final Random gen;
 
     public BlockQueue(int seed) {
         gen = new Random(seed);
@@ -27,7 +27,6 @@ public class BlockQueue {
      */
     public synchronized Block nextBlock() {
         queue.add(newBlock());
-        //TODO move new block down if possible
         return queue.remove();
     }
 

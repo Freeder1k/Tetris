@@ -1,23 +1,31 @@
 package main;
 
+import java.awt.*;
 import java.util.Arrays;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class Tetris {
     public final static int BOARD_HEIGHT = 22;
     public final static int BOARD_WIDTH = 10;
+    private final static int MOVE_DELAY = 1000; //Milliseconds
+    private final static int PLACE_DELAY = 500; //Milliseconds
     private final Output output;
-    private final boolean[][] board = new boolean[BOARD_HEIGHT][BOARD_WIDTH];
-    private int score;
+    private final Color[][] board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
     private final BlockQueue blockQueue;
     private final ScheduledExecutorService timer;
     private final InputListener inputListener;
+    private int score;
     private ScheduledFuture<?> nextTimeStep;
+    private boolean placePlanned = false;
     private boolean isPaused = false;
+    private long pauseTime = 0L;
 
     private Tetris() {
-        for (boolean[] row : board) {
-            Arrays.fill(row, false);
+        for (Color[] row : board) {
+            Arrays.fill(row, Color.BLACK);
         }
 
         inputListener = new InputListener(this);
@@ -26,7 +34,7 @@ public class Tetris {
         blockQueue = new BlockQueue((int) (Math.random() * 1000));
         timer = Executors.newSingleThreadScheduledExecutor();
 
-        nextTimeStep = timer.schedule(this::runTimedStep, 1, TimeUnit.SECONDS);
+        nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
         blockQueue.getActive().moveDown(board);
     }
 
@@ -35,24 +43,25 @@ public class Tetris {
     }
 
     private synchronized void runTimedStep() {
-        if(!isPaused) {
+        if (!isPaused) {
             //Move active block down.
             if (!blockQueue.getActive().moveDown(board)) {
-                placeBlock();
+                placePlanned = true;
+                nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
                 return;
             }
 
             output.updateOutput(blockQueue.getActive(), score);
 
-            nextTimeStep = timer.schedule(this::runTimedStep, 1, TimeUnit.SECONDS);
+            nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
         }
     }
 
     private synchronized void placeBlock() {
-        long start = System.currentTimeMillis();
+        placePlanned = false;
         //Add to board
         Block placed = blockQueue.nextBlock();
-        if(placed.isOnTop()) {
+        if (placed.isOnTop()) {
             gameOver();
             return;
         }
@@ -62,25 +71,23 @@ public class Tetris {
         blockQueue.getActive().moveDown(board);
 
         //Move lines down and add new score.
-        for (int i = BOARD_HEIGHT-1; i >= 0; i--) {
+        for (int i = BOARD_HEIGHT - 1; i >= 0; i--) {
             boolean isFull = true;
-            for (boolean b : board[i]) {
-                isFull = isFull && b;
+            for (Color b : board[i]) {
+                isFull = isFull && (b != Color.BLACK);
             }
-            if(isFull) {
+            if (isFull) {
                 score += 100;
-                for (int i2 = i; i2 < BOARD_HEIGHT-1; i2++) {
-                    board[i2] = board[i2 + 1];
+                for (int i2 = i; i2 < BOARD_HEIGHT - 1; i2++) {
+                    System.arraycopy(board[i2 + 1], 0, board[i2], 0, BOARD_WIDTH);
                 }
-                Arrays.fill(board[BOARD_HEIGHT-1], false);
+                Arrays.fill(board[BOARD_HEIGHT - 1], Color.BLACK);
             }
         }
 
         output.updateOutput(blockQueue.getActive(), score);
 
-        nextTimeStep = timer.schedule(this::runTimedStep, 1, TimeUnit.SECONDS);
-
-        System.out.println("Delay: " + (System.currentTimeMillis() - start) + "ms");
+        nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
     }
 
     private void gameOver() {
@@ -92,63 +99,132 @@ public class Tetris {
     }
 
     public synchronized void drop() {
-        if(!nextTimeStep.cancel(false)) {
-            try {
-                nextTimeStep.get();
-            } catch (Exception ignored) {}
-            if(!nextTimeStep.cancel(true)) {
-                System.out.println("ERROR 123");
-            }
+        if (!nextTimeStep.cancel(false)) {
+            System.out.println("ERROR: Failed to cancel next time step!");
+            return;
         }
         Block block = blockQueue.getActive();
-        while (true){
+        while (true) {
             if (!block.moveDown(board)) break;
         }
         placeBlock();
     }
 
     public synchronized void moveLeft() {
-        //TODO stop nextimestep if at bottom
-        blockQueue.getActive().moveLeft(board);
+        if (!blockQueue.getActive().moveLeft(board))
+            return;
+
         output.updateOutput(blockQueue.getActive(), score);
+
+        if (placePlanned) {
+            if (!nextTimeStep.cancel(false)) {
+                System.out.println("ERROR: Failed to cancel next time step!");
+                return;
+            }
+            if (blockQueue.getActive().canMoveDown(board)) {
+                placePlanned = false;
+                nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.SECONDS);
+            } else
+                nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
+        } else {
+            if (!blockQueue.getActive().canMoveDown(board)) {
+                if (!nextTimeStep.cancel(false)) {
+                    System.out.println("ERROR: Failed to cancel next time step!");
+                    return;
+                }
+                placePlanned = true;
+                nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
+            }
+        }
     }
 
     public synchronized void moveRight() {
-        //TODO stop nextimestep if at bottom
-        blockQueue.getActive().moveRight(board);
+        if (!blockQueue.getActive().moveRight(board))
+            return;
+
         output.updateOutput(blockQueue.getActive(), score);
+
+        if (placePlanned) {
+            if (!nextTimeStep.cancel(false)) {
+                System.out.println("ERROR: Failed to cancel next time step!");
+                return;
+            }
+            if (blockQueue.getActive().canMoveDown(board)) {
+                placePlanned = false;
+                nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.SECONDS);
+            } else
+                nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
+        } else {
+            if (!blockQueue.getActive().canMoveDown(board)) {
+                if (!nextTimeStep.cancel(false)) {
+                    System.out.println("ERROR: Failed to cancel next time step!");
+                    return;
+                }
+                placePlanned = true;
+                nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
+            }
+        }
     }
 
     public synchronized void moveDown() {
-        if(!blockQueue.getActive().moveDown(board)) {
-            if(!nextTimeStep.cancel(false)) {
-                try {
-                    nextTimeStep.get();
-                } catch (Exception ignored) {}
-                if(!nextTimeStep.cancel(true)) {
-                    System.out.println("ERROR 123");
-                }
+        if (!blockQueue.getActive().moveDown(board))
+            return;
+
+        output.updateOutput(blockQueue.getActive(), score);
+
+        if (!blockQueue.getActive().canMoveDown(board)) {
+            if (!nextTimeStep.cancel(false)) {
+                System.out.println("ERROR: Failed to cancel next time step!");
+                return;
             }
-            placeBlock();
+            placePlanned = true;
+            nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
         }
-        else
-            output.updateOutput(blockQueue.getActive(), score);
     }
 
     public synchronized void rotate() {
-        //TODO stop nextimestep if at bottom
-        blockQueue.getActive().rotate(board);
+        if (!blockQueue.getActive().rotate(board))
+            return;
+
         output.updateOutput(blockQueue.getActive(), score);
+
+        if (placePlanned) {
+            if (!nextTimeStep.cancel(false)) {
+                System.out.println("ERROR: Failed to cancel next time step!");
+                return;
+            }
+            if (blockQueue.getActive().canMoveDown(board)) {
+                placePlanned = false;
+                nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.SECONDS);
+            } else
+                nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
+        } else {
+            if (!blockQueue.getActive().canMoveDown(board)) {
+                if (!nextTimeStep.cancel(false)) {
+                    System.out.println("ERROR: Failed to cancel next time step!");
+                    return;
+                }
+                placePlanned = true;
+                nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
+            }
+        }
     }
 
     public synchronized void pause() {
+        if (!nextTimeStep.cancel(false)) {
+            System.out.println("ERROR: Failed to cancel next time step!");
+            return;
+        }
         isPaused = true;
+        if(!placePlanned)
+            pauseTime = System.currentTimeMillis();
     }
 
     public synchronized void resume() {
-        if(isPaused) {
+        if (isPaused) {
             isPaused = false;
-            runTimedStep();
+            nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY + pauseTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+            pauseTime = 0L;
         }
     }
 
