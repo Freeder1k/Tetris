@@ -14,9 +14,8 @@ public class Tetris {
     private final static int PLACE_DELAY = 500; //Milliseconds
     private final Output output;
     private final Color[][] board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
-    private final BlockQueue blockQueue;
     private final ScheduledExecutorService timer;
-    private final InputListener inputListener;
+    private BlockQueue blockQueue;
     private int score;
     private ScheduledFuture<?> nextTimeStep;
     private boolean placePlanned = false;
@@ -24,22 +23,25 @@ public class Tetris {
     private long pauseTime = 0L;
 
     private Tetris() {
-        for (Color[] row : board) {
-            Arrays.fill(row, Color.BLACK);
-        }
-
-        inputListener = new InputListener(this);
-        output = new Output(board, inputListener);
-        score = 0;
-        blockQueue = new BlockQueue((int) (Math.random() * 1000));
+        InputListener inputListener = new InputListener(this);
+        output = new Output(board, inputListener, this);
         timer = Executors.newSingleThreadScheduledExecutor();
-
-        nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
-        blockQueue.getActive().moveDown(board);
     }
 
     public static void main(String[] args) {
         new Tetris();
+    }
+
+    public void start() {
+        for (Color[] row : board) {
+            Arrays.fill(row, Color.BLACK);
+        }
+        score = 0;
+        blockQueue = new BlockQueue((int) (Math.random() * 1000));
+
+        nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
+        blockQueue.getActive().moveDown(board);
+        output.updateOutput(blockQueue.getActive(), score);
     }
 
     private synchronized void runTimedStep() {
@@ -92,10 +94,8 @@ public class Tetris {
 
     private void gameOver() {
         System.out.println("Game over! Score: " + score);
-        timer.shutdownNow();
-        output.removeKeyListener(inputListener);
-
-        //TODO make better
+        nextTimeStep.cancel(true);
+        output.setToGameOverMenu();
     }
 
     public synchronized void drop() {
@@ -116,26 +116,7 @@ public class Tetris {
 
         output.updateOutput(blockQueue.getActive(), score);
 
-        if (placePlanned) {
-            if (!nextTimeStep.cancel(false)) {
-                System.out.println("ERROR: Failed to cancel next time step!");
-                return;
-            }
-            if (blockQueue.getActive().canMoveDown(board)) {
-                placePlanned = false;
-                nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.SECONDS);
-            } else
-                nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
-        } else {
-            if (!blockQueue.getActive().canMoveDown(board)) {
-                if (!nextTimeStep.cancel(false)) {
-                    System.out.println("ERROR: Failed to cancel next time step!");
-                    return;
-                }
-                placePlanned = true;
-                nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
-            }
-        }
+        checkMove();
     }
 
     public synchronized void moveRight() {
@@ -144,26 +125,7 @@ public class Tetris {
 
         output.updateOutput(blockQueue.getActive(), score);
 
-        if (placePlanned) {
-            if (!nextTimeStep.cancel(false)) {
-                System.out.println("ERROR: Failed to cancel next time step!");
-                return;
-            }
-            if (blockQueue.getActive().canMoveDown(board)) {
-                placePlanned = false;
-                nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.SECONDS);
-            } else
-                nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
-        } else {
-            if (!blockQueue.getActive().canMoveDown(board)) {
-                if (!nextTimeStep.cancel(false)) {
-                    System.out.println("ERROR: Failed to cancel next time step!");
-                    return;
-                }
-                placePlanned = true;
-                nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
-            }
-        }
+        checkMove();
     }
 
     public synchronized void moveDown() {
@@ -188,6 +150,10 @@ public class Tetris {
 
         output.updateOutput(blockQueue.getActive(), score);
 
+        checkMove();
+    }
+
+    private void checkMove() {
         if (placePlanned) {
             if (!nextTimeStep.cancel(false)) {
                 System.out.println("ERROR: Failed to cancel next time step!");
@@ -211,12 +177,14 @@ public class Tetris {
     }
 
     public synchronized void pause() {
-        if (!nextTimeStep.cancel(false)) {
-            System.out.println("ERROR: Failed to cancel next time step!");
-            return;
+        if(nextTimeStep != null) {
+            if (!nextTimeStep.cancel(false)) {
+                System.out.println("ERROR: Failed to cancel next time step!");
+                return;
+            }
         }
         isPaused = true;
-        if(!placePlanned)
+        if (!placePlanned)
             pauseTime = System.currentTimeMillis();
     }
 
