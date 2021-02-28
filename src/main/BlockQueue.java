@@ -5,12 +5,14 @@ import java.util.Random;
 
 public class BlockQueue {
     private final ArrayDeque<Block> queue;
+    public final int seed;
 
     private final Random gen;
 
     public BlockQueue(int seed) {
         gen = new Random(seed);
         queue = new ArrayDeque<>(7);
+        this.seed = seed;
         for (int i = 0; i < 6; i++) {
             queue.add(newBlock());
         }

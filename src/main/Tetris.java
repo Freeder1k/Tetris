@@ -1,5 +1,9 @@
 package main;
 
+import main.multiplayer.TetrisClient;
+import main.multiplayer.TetrisServer;
+import main.output.Output;
+
 import java.awt.*;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
@@ -21,6 +25,15 @@ public class Tetris {
     private boolean placePlanned = false;
     private boolean isPaused = false;
     private long pauseTime = 0L;
+    private boolean isMultiplayer = false;
+    private TetrisClient multiplayerClient;
+    private int playerCount;
+    private boolean customBoard;
+    private int[] customBoardSize = new int[2];
+    private boolean isMultiplayerRunning;
+    private int multiplayerID;
+    private boolean isMultiplayerHost;
+    private TetrisServer tetrisServer;
 
     private Tetris() {
         InputListener inputListener = new InputListener(this);
@@ -41,7 +54,7 @@ public class Tetris {
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
         blockQueue.getActive().moveDown(board);
-        output.updateOutput(blockQueue.getActive(), score);
+        output.updateOutput(blockQueue, score);
     }
 
     private synchronized void runTimedStep() {
@@ -53,7 +66,7 @@ public class Tetris {
                 return;
             }
 
-            output.updateOutput(blockQueue.getActive(), score);
+            output.updateOutput(blockQueue, score);
 
             nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
         }
@@ -87,7 +100,7 @@ public class Tetris {
             }
         }
 
-        output.updateOutput(blockQueue.getActive(), score);
+        output.updateOutput(blockQueue, score);
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
     }
@@ -95,7 +108,7 @@ public class Tetris {
     private void gameOver() {
         System.out.println("Game over! Score: " + score);
         nextTimeStep.cancel(true);
-        output.setToGameOverMenu();
+        output.setToGameOverMenu(score);
     }
 
     public synchronized void drop() {
@@ -114,7 +127,7 @@ public class Tetris {
         if (!blockQueue.getActive().moveLeft(board))
             return;
 
-        output.updateOutput(blockQueue.getActive(), score);
+        output.updateOutput(blockQueue, score);
 
         checkMove();
     }
@@ -123,7 +136,7 @@ public class Tetris {
         if (!blockQueue.getActive().moveRight(board))
             return;
 
-        output.updateOutput(blockQueue.getActive(), score);
+        output.updateOutput(blockQueue, score);
 
         checkMove();
     }
@@ -132,7 +145,7 @@ public class Tetris {
         if (!blockQueue.getActive().moveDown(board))
             return;
 
-        output.updateOutput(blockQueue.getActive(), score);
+        output.updateOutput(blockQueue, score);
 
         if (!blockQueue.getActive().canMoveDown(board)) {
             if (!nextTimeStep.cancel(false)) {
@@ -148,7 +161,7 @@ public class Tetris {
         if (!blockQueue.getActive().rotate(board))
             return;
 
-        output.updateOutput(blockQueue.getActive(), score);
+        output.updateOutput(blockQueue, score);
 
         checkMove();
     }
@@ -197,7 +210,66 @@ public class Tetris {
     }
 
     public void stop() {
+        if(isMultiplayer)
+            multiplayerClient.shutdown();
         timer.shutdownNow();
         output.dispose();
+    }
+
+    public void joinMultiplayer(String hostName, int port) {
+        isMultiplayer = true;
+        try {
+            multiplayerClient = TetrisClient.createClient(this, hostName, port);
+        } catch (TetrisClient.FailedToCreateException e) {
+            e.printStackTrace();
+            //TODO
+            isMultiplayer = false;
+            return;
+        }
+
+        playerCount = multiplayerClient.getPlayerCount();
+        customBoard = multiplayerClient.board_height != BOARD_HEIGHT && multiplayerClient.board_width != BOARD_WIDTH;
+        if(customBoard) {
+            customBoardSize[0] = multiplayerClient.board_height;
+            customBoardSize[1] = multiplayerClient.board_width;
+        }
+
+        multiplayerID = multiplayerClient.id;
+
+        isMultiplayerRunning = multiplayerClient.isRunning();
+        //TODO update output
+    }
+
+    public void leaveMultiplayer() {
+        isMultiplayer = false;
+        multiplayerClient.shutdown();
+    }
+
+    public void hostMultiplayer() {
+        isMultiplayer = true;
+        isMultiplayerHost = true;
+        tetrisServer = TetrisServer.createServer(this);
+        if(tetrisServer == null) {
+            //TODO
+            isMultiplayer = false;
+            isMultiplayerHost = false;
+        }
+
+        playerCount = 1;
+
+        multiplayerID = 0;
+        //TODO update output
+    }
+
+    public synchronized void setWaitingPlayers(int amount) {
+        //TODO
+        playerCount = amount;
+    }
+
+
+
+    public void startSingleplayerGame() {
+        start();
+        //TODO
     }
 }
