@@ -4,9 +4,8 @@ import java.util.ArrayDeque;
 import java.util.Random;
 
 public class BlockQueue {
-    private final ArrayDeque<Block> queue;
     public final int seed;
-
+    private final ArrayDeque<Block> queue;
     private final Random gen;
 
     public BlockQueue(int seed) {
@@ -14,7 +13,9 @@ public class BlockQueue {
         queue = new ArrayDeque<>(7);
         this.seed = seed;
         for (int i = 0; i < 6; i++) {
-            queue.add(newBlock());
+            Block newB = newBlock();
+            if (newB != null)
+                queue.add(newB);
         }
     }
 
@@ -28,20 +29,30 @@ public class BlockQueue {
      * @return The removed block.
      */
     public synchronized Block nextBlock() {
-        queue.add(newBlock());
+        Block newB = newBlock();
+        if (newB != null)
+            queue.add(newB);
         return queue.remove();
     }
 
     private Block newBlock() {
-        return switch (gen.nextInt(7)) {
-            case 0 -> Block.createSBlock();
-            case 1 -> Block.createZBlock();
-            case 2 -> Block.createCubeBlock();
-            case 3 -> Block.createLBlock();
-            case 4 -> Block.createJBlock();
-            case 5 -> Block.createIBlock();
-            case 6 -> Block.createTBlock();
-            default -> null;
-        };
+        switch (gen.nextInt(7)) {
+            case 0:
+                return Block.createSBlock();
+            case 1:
+                return Block.createZBlock();
+            case 2:
+                return Block.createCubeBlock();
+            case 3:
+                return Block.createLBlock();
+            case 4:
+                return Block.createJBlock();
+            case 5:
+                return Block.createIBlock();
+            case 6:
+                return Block.createTBlock();
+            default:
+                return null;
+        }
     }
 }

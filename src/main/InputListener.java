@@ -20,11 +20,21 @@ public class InputListener implements KeyListener, WindowListener {
     @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case 32 -> tetris.drop();       //space
-            case 37 -> tetris.moveLeft();   //left
-            case 38 -> tetris.rotate();     //up
-            case 39 -> tetris.moveRight();  //right
-            case 40 -> tetris.moveDown();   //down
+            case 32:
+                tetris.drop();       //space
+                break;
+            case 37:
+                tetris.moveLeft();   //left
+                break;
+            case 38:
+                tetris.rotate();     //up
+                break;
+            case 39:
+                tetris.moveRight();  //right
+                break;
+            case 40:
+                tetris.moveDown();   //down
+                break;
         }
     }
 

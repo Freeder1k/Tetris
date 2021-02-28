@@ -36,9 +36,15 @@ public class ColorOptionPanelManager {
             if (event.getStateChange() == ItemEvent.SELECTED) {
                 String item = (String) event.getItem();
                 switch (item) {
-                    case "Standard" -> selectedIndex = 0;
-                    case "Blind Mode" -> selectedIndex = 1;
-                    case "Rainbow Mode" -> selectedIndex = 2;
+                    case "Standard":
+                        selectedIndex = 0;
+                        break;
+                    case "Blind Mode":
+                        selectedIndex = 1;
+                        break;
+                    case "Rainbow Mode":
+                        selectedIndex = 2;
+                        break;
                 }
                 comboboxes.forEach(b -> b.setSelectedIndex(selectedIndex));
                 //TODO output.updatecolormode
