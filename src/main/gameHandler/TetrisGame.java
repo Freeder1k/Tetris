@@ -38,7 +38,7 @@ public abstract class TetrisGame {
                 return;
             }
 
-            output.updateOutput(blockQueue, score);
+            output.updateOutput(board, blockQueue, score);
 
             nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
         }
@@ -64,7 +64,7 @@ public abstract class TetrisGame {
         if (!blockQueue.getActive().moveLeft(board))
             return;
 
-        output.updateOutput(blockQueue, score);
+        output.updateOutput(board, blockQueue, score);
 
         checkMove();
     }
@@ -73,7 +73,7 @@ public abstract class TetrisGame {
         if (!blockQueue.getActive().moveRight(board))
             return;
 
-        output.updateOutput(blockQueue, score);
+        output.updateOutput(board, blockQueue, score);
 
         checkMove();
     }
@@ -82,7 +82,7 @@ public abstract class TetrisGame {
         if (!blockQueue.getActive().moveDown(board))
             return;
 
-        output.updateOutput(blockQueue, score);
+        output.updateOutput(board, blockQueue, score);
 
         if (!blockQueue.getActive().canMoveDown(board)) {
             if (!nextTimeStep.cancel(false)) {
@@ -98,7 +98,7 @@ public abstract class TetrisGame {
         if (!blockQueue.getActive().rotate(board))
             return;
 
-        output.updateOutput(blockQueue, score);
+        output.updateOutput(board, blockQueue, score);
 
         checkMove();
     }

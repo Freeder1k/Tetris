@@ -1,10 +1,12 @@
 package main.output;
 
+import main.Tetris;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class MultiplayerMenu extends JPanel {
-    protected MultiplayerMenu(Output output, Font titleFont, Font buttonFont, JPanel colorOptionPanel) {
+    protected MultiplayerMenu(Output output, Tetris tetris, Font titleFont, Font buttonFont, JPanel colorOptionPanel) {
         this.setLayout(new BorderLayout());
 
         JLabel gameOverLabel = new JLabel("<html><center>MULTI<br/>PLAYER</center></html>");
@@ -41,6 +43,7 @@ public class MultiplayerMenu extends JPanel {
         hostButton.setText("Host game");
         hostButton.addActionListener(e -> {
             //TODO host game
+            tetris.hostMultiplayerGame();
             output.setToMultiplayerHostWait("abc", 0);
         });
         hbp.add(hostButton);

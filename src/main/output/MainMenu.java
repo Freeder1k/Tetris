@@ -1,10 +1,12 @@
 package main.output;
 
+import main.Tetris;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class MainMenu extends JPanel {
-    protected MainMenu(Output output, Font titleFont, Font buttonFont, JPanel colorOptionPanel) {
+    protected MainMenu(Output output, Tetris tetris, Font titleFont, Font buttonFont, JPanel colorOptionPanel) {
         this.setLayout(new BorderLayout());
 
         JLabel tetrisLabel = new JLabel("TETRIS");
@@ -28,7 +30,7 @@ public class MainMenu extends JPanel {
         singleplayerButton.setText("Singleplayer");
         singleplayerButton.addActionListener(e -> {
             output.setToSingleplayerInGame();
-            output.startSingleplayerGame();
+            tetris.startSingleplayerGame();
         });
         spp.add(singleplayerButton);
 

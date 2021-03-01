@@ -1,5 +1,7 @@
 package main;
 
+import main.gameHandler.TetrisGame;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
@@ -7,6 +9,7 @@ import java.awt.event.WindowListener;
 
 public class InputListener implements KeyListener, WindowListener {
     private final Tetris tetris;
+    private TetrisGame gameHandler;
 
     public InputListener(Tetris tetris) {
         this.tetris = tetris;
@@ -19,21 +22,23 @@ public class InputListener implements KeyListener, WindowListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        if(gameHandler == null)
+            return;
         switch (e.getKeyCode()) {
             case 32:
-                tetris.drop();       //space
+                gameHandler.drop();       //space
                 break;
             case 37:
-                tetris.moveLeft();   //left
+                gameHandler.moveLeft();   //left
                 break;
             case 38:
-                tetris.rotate();     //up
+                gameHandler.rotate();     //up
                 break;
             case 39:
-                tetris.moveRight();  //right
+                gameHandler.moveRight();  //right
                 break;
             case 40:
-                tetris.moveDown();   //down
+                gameHandler.moveDown();   //down
                 break;
         }
     }
@@ -52,30 +57,42 @@ public class InputListener implements KeyListener, WindowListener {
     @Override
     public void windowClosing(WindowEvent e) {
         tetris.stop();
+        if(gameHandler != null)
+            gameHandler.stop();
     }
 
     @Override
     public void windowClosed(WindowEvent e) {
         tetris.stop();
+        if(gameHandler != null)
+            gameHandler.stop();
     }
 
     @Override
     public void windowIconified(WindowEvent e) {
-        tetris.pause();
+        if(gameHandler != null)
+            gameHandler.pause();
     }
 
     @Override
     public void windowDeiconified(WindowEvent e) {
-        tetris.resume();
+        if(gameHandler != null)
+            gameHandler.resume();
     }
 
     @Override
     public void windowActivated(WindowEvent e) {
-        tetris.resume();
+        if(gameHandler != null)
+            gameHandler.resume();
     }
 
     @Override
     public void windowDeactivated(WindowEvent e) {
-        tetris.pause();
+        if(gameHandler != null)
+            gameHandler.pause();
+    }
+    
+    public void setGameHandler(TetrisGame gameHandler) {
+        this.gameHandler = gameHandler;
     }
 }

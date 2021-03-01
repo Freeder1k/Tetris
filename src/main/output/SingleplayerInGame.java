@@ -9,12 +9,10 @@ import javax.swing.border.Border;
 import java.awt.*;
 
 public class SingleplayerInGame extends JPanel {
-    private final Color[][] board;
     private final JPanel[][] gameDisplay = new JPanel[Tetris.BOARD_HEIGHT - 2][Tetris.BOARD_WIDTH];
     private final JLabel scoreLabel;
 
-    protected SingleplayerInGame(Color[][] board) {
-        this.board = board;
+    protected SingleplayerInGame() {
 
         scoreLabel = new JLabel("Score: 0", SwingConstants.CENTER);
         Font scoreFont = Output.getFont(null, -1, 20, scoreLabel.getFont());
@@ -53,7 +51,7 @@ public class SingleplayerInGame extends JPanel {
         }
     }
 
-    protected synchronized void update(BlockQueue blockQueue, int score) {
+    protected synchronized void update(Color[][] board, BlockQueue blockQueue, int score) {
         Block activeBlock = blockQueue.getActive();//TODO display queue
         Color[][] blockOverlay = activeBlock.getOverlay();
 

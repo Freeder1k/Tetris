@@ -3,7 +3,10 @@ package main.multiplayer;
 import main.Tetris;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
@@ -26,7 +29,8 @@ public class TetrisServer {
         this.tetris = tetris;
 
         serverSocket = new ServerSocket(0);
-
+        System.out.println("HOSTING");
+        System.out.println(InetAddress.getLocalHost().getHostAddress() + ":" + serverSocket.getLocalPort());
         clientListener = CompletableFuture.runAsync(() -> {
             while (true) {
                 try {
@@ -34,8 +38,11 @@ public class TetrisServer {
                     TetrisServerThread thread = new TetrisServerThread(serverSocket.accept(), nextID, playerCount, this, running.get());
                     thread.start();
                     serverThreads.put(nextID, thread);
-                    tetris.setWaitingPlayers(playerCount);
+                    //TODO tetris.setWaitingPlayers(playerCount);
                     nextID++;
+                    System.out.println("CONNECTION");
+                } catch (SocketException ignored) {
+                    break;
                 } catch (IOException e) {
                     e.printStackTrace();
                     break;
@@ -58,7 +65,7 @@ public class TetrisServer {
         serverThreads.remove(id);
         activePlayers.remove(id);
         playerCount--;
-        tetris.setWaitingPlayers(playerCount);
+        //TODO tetris.setWaitingPlayers(playerCount);
     }
 
     public synchronized void distributeLines(int senderID, int amount) {
@@ -94,7 +101,6 @@ public class TetrisServer {
         serverThreads.values().forEach(TetrisServerThread::shutdown);
         serverThreads.clear();
         activePlayers.clear();
-        clientListener.cancel(true);
         try {
             serverSocket.close();
         } catch (IOException e) {
@@ -107,6 +113,10 @@ public class TetrisServer {
     }
 
     public String getHostName() {
-        return serverSocket.getInetAddress().getHostName();
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            return "unknown";
+        }
     }
 }

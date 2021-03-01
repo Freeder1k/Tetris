@@ -3,7 +3,7 @@ package main;
 import java.awt.*;
 import java.util.Arrays;
 
-public class Block {
+public class Block {//TODO board size or board
     private final int[][] points;
     private final int bBoxWidth;
     private final Color color;
@@ -55,8 +55,8 @@ public class Block {
             rotation++;
 
         for (int[] point : points) {
-            int xNew = Math.round(-(((float) point[0]) - ((float) (bBoxWidth - 1)) / 2.0f) + (((float) (bBoxWidth - 1))) / 2.0f);
-            int yNew = Math.round((((float) point[1]) - ((float) (bBoxWidth - 1)) / 2.0f) + (((float) (bBoxWidth - 1))) / 2.0f);
+            int xNew = bBoxWidth - 1 - point[0];
+            int yNew = point[1];
             point[0] = yNew;
             point[1] = xNew;
         }

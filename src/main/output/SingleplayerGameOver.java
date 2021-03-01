@@ -1,12 +1,14 @@
 package main.output;
 
+import main.Tetris;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class SingleplayerGameOver extends JPanel {
     JLabel gameOverScoreLabel;
 
-    protected SingleplayerGameOver(Output output, Font titleFont, Font buttonFont, JPanel colorOptionPanel) {
+    protected SingleplayerGameOver(Output output, Tetris tetris, Font titleFont, Font buttonFont, JPanel colorOptionPanel) {
         this.setLayout(new BorderLayout());
 
         JLabel gameOverLabel = new JLabel("<html><center>GAME<br/>OVER</center></html>");
@@ -36,7 +38,7 @@ public class SingleplayerGameOver extends JPanel {
         retryButton.setText("Play again");
         retryButton.addActionListener(e -> {
             output.setToSingleplayerInGame();
-            output.startSingleplayerGame();
+            tetris.startSingleplayerGame();
         });
         spp.add(retryButton);
 

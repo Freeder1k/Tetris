@@ -1,10 +1,12 @@
 package main.output;
 
+import main.Tetris;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class MultiplayerJoin extends JPanel {
-    protected MultiplayerJoin(Output output, Font titleFont, Font buttonFont, JPanel colorOptionPanel) {
+    protected MultiplayerJoin(Output output, Tetris tetris, Font titleFont, Font buttonFont, JPanel colorOptionPanel) {
         this.setLayout(new BorderLayout());
 
         JLabel gameOverLabel = new JLabel("<html><center>MULTI<br/>PLAYER</center></html>");
@@ -69,6 +71,7 @@ public class MultiplayerJoin extends JPanel {
         joinButton.setText("Join");
         joinButton.addActionListener(e -> {
             //TODO check data and join if can and then set to multip client waiting
+            tetris.joinMultiplayerGame(hostNameTextField.getText(), Integer.parseInt(portTextField.getText()));
             output.setToMultiplayerClientWait("abc", 0, 0, 1);
         });
         jbp.add(joinButton);

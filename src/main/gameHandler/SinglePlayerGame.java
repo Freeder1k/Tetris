@@ -27,7 +27,7 @@ public class SinglePlayerGame extends TetrisGame {
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
 
-        output.updateOutput(blockQueue, score);
+        output.updateOutput(board, blockQueue, score);
     }
 
     synchronized void placeBlock() {
@@ -58,7 +58,7 @@ public class SinglePlayerGame extends TetrisGame {
             }
         }
 
-        output.updateOutput(blockQueue, score);
+        output.updateOutput(board, blockQueue, score);
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
     }
@@ -90,6 +90,7 @@ public class SinglePlayerGame extends TetrisGame {
     }
 
     public void stop() {
-        nextTimeStep.cancel(true);
+        if(nextTimeStep != null)
+            nextTimeStep.cancel(true);
     }
 }

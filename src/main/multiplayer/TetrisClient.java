@@ -114,7 +114,7 @@ public class TetrisClient {
                             try {
                                 int amount = Integer.parseInt(input[1]);
                                 playerCount = amount;
-                                tetris.setWaitingPlayers(amount);
+                                //TODO tetris.setWaitingPlayers(amount);
                             } catch (NumberFormatException ignored) {
                                 System.out.println("Invalid server input: " + inputLine);
                             }

@@ -3,7 +3,7 @@ package main;
 import java.util.ArrayDeque;
 import java.util.Random;
 
-public class BlockQueue {
+public class BlockQueue {//TODO board size for blocks or board
     public final int seed;
     private final ArrayDeque<Block> queue;
     private final Random gen;
@@ -24,7 +24,7 @@ public class BlockQueue {
     }
 
     /**
-     * Add a new random block to the queue. And remove the active one.
+     * Add a new random block to the queue and remove the active one.
      *
      * @return The removed block.
      */

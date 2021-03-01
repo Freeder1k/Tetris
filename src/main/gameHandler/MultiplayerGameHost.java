@@ -15,7 +15,7 @@ public class MultiplayerGameHost extends TetrisGame {
     private final TetrisServer tetrisServer;
     private int receivedLines = 0;
 
-    private MultiplayerGameHost(Tetris tetris, Output output, ScheduledExecutorService timer, TetrisServer tetrisServer) {
+    private MultiplayerGameHost(Output output, ScheduledExecutorService timer, TetrisServer tetrisServer) {
         super(output, timer, new Color[Tetris.BOARD_HEIGHT][Tetris.BOARD_WIDTH]);
         this.tetrisServer = tetrisServer;
     }
@@ -25,7 +25,7 @@ public class MultiplayerGameHost extends TetrisGame {
         if (host == null)
             return null;
 
-        return new MultiplayerGameHost(tetris, output, timer, host);
+        return new MultiplayerGameHost(output, timer, host);
     }
 
 
@@ -43,8 +43,8 @@ public class MultiplayerGameHost extends TetrisGame {
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
 
-        output.startMultiplayerGame();
-        output.updateOutput(blockQueue, score);
+        output.startMultiplayerGame(board);
+        output.updateOutput(board, blockQueue, score);//TODO multiplayer out
     }
 
     synchronized void placeBlock() {
@@ -80,7 +80,7 @@ public class MultiplayerGameHost extends TetrisGame {
         if (amount > 0)
             tetrisServer.distributeLines(0, amount);
 
-        output.updateOutput(blockQueue, score);
+        output.updateOutput(board, blockQueue, score);
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
     }
@@ -102,7 +102,8 @@ public class MultiplayerGameHost extends TetrisGame {
 
     public void stop() {
         tetrisServer.shutdown();
-        nextTimeStep.cancel(true);
+        if(nextTimeStep != null)
+            nextTimeStep.cancel(true);
     }
 
     public synchronized void receiveLines(int amount) {

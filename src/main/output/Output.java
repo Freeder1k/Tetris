@@ -3,13 +3,13 @@ package main.output;
 import main.BlockQueue;
 import main.InputListener;
 import main.Tetris;
+import main.gameHandler.TetrisGame;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class Output extends JFrame {
     private final InputListener inputListener;
-    private final Tetris tetris;
     private final Container contentPane;
     private final MainMenu mainMenu;
     private final SingleplayerInGame singleplayerInGame;
@@ -21,9 +21,8 @@ public class Output extends JFrame {
     private final MultiplayerClientWait multiplayerClientWait;
     private final MultiplayerGameOver multiplayerGameOver;
 
-    public Output(Color[][] board, InputListener inputListener, Tetris tetris) {
+    public Output(InputListener inputListener, Tetris tetris) {
         this.inputListener = inputListener;
-        this.tetris = tetris;
 
         this.setSize(Tetris.BOARD_WIDTH * 30 + 50, Tetris.BOARD_HEIGHT * 30 + 50);
         this.setResizable(false);
@@ -36,17 +35,15 @@ public class Output extends JFrame {
         multiplayerBottomPanelManager = new MultiplayerBottomPanelManager();
 
         Font titleFont = getFont("Rockwell Extra Bold", Font.BOLD, 72, new JLabel().getFont());
-        //Font titleFont = new Font("Rockwell Extra Bold", Font.BOLD, 72);
         Font buttonFont = getFont(null, -1, 48, new JButton().getFont());
-        //Font buttonFont = new Font(colorLabel.getFont().getName(), Font.PLAIN, 48);
         Font labelFont = getFont(null, -1, 16, new JLabel().getFont());
         
 
-        mainMenu = new MainMenu(this, titleFont, buttonFont, colorOptionPanelManager.create());
-        singleplayerInGame = new SingleplayerInGame(board);
-        singleplayerGameOver = new SingleplayerGameOver(this, titleFont, buttonFont, colorOptionPanelManager.create());
-        multiplayerMenu = new MultiplayerMenu(this, titleFont, buttonFont, colorOptionPanelManager.create());
-        multiplayerJoin = new MultiplayerJoin(this, titleFont, buttonFont, colorOptionPanelManager.create());
+        mainMenu = new MainMenu(this, tetris, titleFont, buttonFont, colorOptionPanelManager.create());
+        singleplayerInGame = new SingleplayerInGame();
+        singleplayerGameOver = new SingleplayerGameOver(this, tetris, titleFont, buttonFont, colorOptionPanelManager.create());
+        multiplayerMenu = new MultiplayerMenu(this, tetris, titleFont, buttonFont, colorOptionPanelManager.create());
+        multiplayerJoin = new MultiplayerJoin(this, tetris, titleFont, buttonFont, colorOptionPanelManager.create());
         multiplayerHostWait = new MultiplayerHostWait(this, titleFont, buttonFont, labelFont, colorOptionPanelManager.create(), multiplayerBottomPanelManager.create());
         multiplayerClientWait = new MultiplayerClientWait(this, titleFont, buttonFont, labelFont, colorOptionPanelManager.create(), multiplayerBottomPanelManager.create());
         multiplayerGameOver = new MultiplayerGameOver(this, titleFont, buttonFont, labelFont, colorOptionPanelManager.create(), multiplayerBottomPanelManager.create());
@@ -73,8 +70,8 @@ public class Output extends JFrame {
         return new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
     }
 
-    public synchronized void updateOutput(BlockQueue blockQueue, int score) {
-        singleplayerInGame.update(blockQueue, score);
+    public synchronized void updateOutput(Color[][] board, BlockQueue blockQueue, int score) {
+        singleplayerInGame.update(board, blockQueue, score);
     }
 
     public synchronized void setToGameOverMenu(int score) {
@@ -170,19 +167,14 @@ public class Output extends JFrame {
 
         this.setVisible(true);
     }
-    
-    
-    
-    
 
-    protected void startSingleplayerGame() {
-        tetris.startSingleplayerGame();
-    }
+
 
     public void setToMultiplayerGameOverMenu() {
-
+        //TODO
     }
 
-    public void startMultiplayerGame() {
+    public void startMultiplayerGame(Color[][] board) {
+        //TODO set to multiplayer in game + frame resize if necessary
     }
 }

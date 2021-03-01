@@ -15,7 +15,7 @@ public class MultiplayerGameClient extends TetrisGame {
     private final TetrisClient multiplayerClient;
     private int receivedLines = 0;
 
-    private MultiplayerGameClient(Tetris tetris, Output output, ScheduledExecutorService timer, TetrisClient multiplayerClient) {
+    private MultiplayerGameClient(Output output, ScheduledExecutorService timer, TetrisClient multiplayerClient) {
         super(output, timer, new Color[multiplayerClient.board_height][multiplayerClient.board_width]);
         this.multiplayerClient = multiplayerClient;
 
@@ -27,7 +27,7 @@ public class MultiplayerGameClient extends TetrisGame {
     }
 
     public static MultiplayerGameClient create(Tetris tetris, Output output, ScheduledExecutorService timer, String hostName, int port) throws TetrisClient.FailedToCreateException {
-        return new MultiplayerGameClient(tetris, output, timer, TetrisClient.createClient(tetris, hostName, port));
+        return new MultiplayerGameClient(output, timer, TetrisClient.createClient(tetris, hostName, port));
     }
 
 
@@ -41,8 +41,8 @@ public class MultiplayerGameClient extends TetrisGame {
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
 
-        output.startMultiplayerGame();
-        output.updateOutput(blockQueue, score);
+        output.startMultiplayerGame(board);
+        output.updateOutput(board, blockQueue, score);//TODO multiplayer out
     }
 
     synchronized void placeBlock() {
@@ -78,7 +78,7 @@ public class MultiplayerGameClient extends TetrisGame {
         if (amount > 0)
             multiplayerClient.sendLines(amount);
 
-        output.updateOutput(blockQueue, score);
+        output.updateOutput(board, blockQueue, score);
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
     }
@@ -100,7 +100,8 @@ public class MultiplayerGameClient extends TetrisGame {
 
     public void stop() {
         multiplayerClient.shutdown();
-        nextTimeStep.cancel(true);
+        if(nextTimeStep != null)
+            nextTimeStep.cancel(true);
     }
 
     public synchronized void receiveLines(int amount) {
