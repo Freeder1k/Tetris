@@ -42,21 +42,31 @@ public class Tetris {
         multiplayerGameHost.start();
     }
 
-    public void hostMultiplayerGame() {
+    public void startMultiplayerClientGame() {
+        multiplayerGameClient.start();
+    }
+
+    public boolean hostMultiplayerGame() {
         multiplayerGameHost = MultiplayerGameHost.create(this, output, timer);
         if (multiplayerGameHost == null)
-            ;//TODO
+            return false;//TODO
+
+        output.setMultiplayerInfo(multiplayerGameHost.getHostName(), multiplayerGameHost.getPort());
 
         inputListener.setGameHandler(multiplayerGameHost);
+        return true;
     }
 
     public boolean joinMultiplayerGame(String hostName, int port) {
         try {
-            multiplayerGameClient = MultiplayerGameClient.create(this, output, timer, hostName, port);
+            multiplayerGameClient = MultiplayerGameClient.create(output, timer, hostName, port);
         } catch (TetrisClient.FailedToCreateException e) {
             //TODO
+            System.out.println(e.getMessage());
             return false;
         }
+
+        output.setMultiplayerInfo(hostName, port);
 
         inputListener.setGameHandler(multiplayerGameClient);
         return true;

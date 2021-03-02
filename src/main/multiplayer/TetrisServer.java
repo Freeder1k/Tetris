@@ -1,6 +1,7 @@
 package main.multiplayer;
 
 import main.Tetris;
+import main.gameHandler.MultiplayerGameHost;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -15,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TetrisServer {
-    private final Tetris tetris;
     private final ServerSocket serverSocket;
     private final CompletableFuture<?> clientListener;
     private final Map<Integer, TetrisServerThread> serverThreads = new ConcurrentHashMap<>();
@@ -24,10 +24,9 @@ public class TetrisServer {
     private final AtomicBoolean running = new AtomicBoolean(false);
     private int nextID = 1; //ID 0 = host
     private int playerCount = 1;
+    private MultiplayerGameHost multiplayerGameHost;
 
-    private TetrisServer(Tetris tetris) throws IOException {
-        this.tetris = tetris;
-
+    private TetrisServer() throws IOException {
         serverSocket = new ServerSocket(0);
         System.out.println("HOSTING");
         System.out.println(InetAddress.getLocalHost().getHostAddress() + ":" + serverSocket.getLocalPort());
@@ -51,9 +50,9 @@ public class TetrisServer {
         });
     }
 
-    public static TetrisServer createServer(Tetris tetris) {
+    public static TetrisServer createServer() {
         try {
-            return new TetrisServer(tetris);
+            return new TetrisServer();
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("ERROR: Failed to create server!");
@@ -87,7 +86,7 @@ public class TetrisServer {
     private void endGame(int winnerID) {
         running.set(false);
         serverThreads.values().forEach(t -> t.endGame(winnerID));
-        //TODO host
+         multiplayerGameHost.end();
     }
 
     public synchronized void startGame(int seed) {
@@ -95,6 +94,7 @@ public class TetrisServer {
         activePlayers.add(0);
         activePlayers.addAll(serverThreads.keySet());
         running.set(true);
+        serverThreads.values().forEach(t -> t.startGame(seed));
     }
 
     public void shutdown() {
@@ -118,5 +118,9 @@ public class TetrisServer {
         } catch (UnknownHostException e) {
             return "unknown";
         }
+    }
+
+    public void setMultiplayerGameHost(MultiplayerGameHost multiplayerGameHost) {
+        this.multiplayerGameHost = multiplayerGameHost;
     }
 }

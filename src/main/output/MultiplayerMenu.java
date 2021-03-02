@@ -44,7 +44,7 @@ public class MultiplayerMenu extends JPanel {
         hostButton.addActionListener(e -> {
             //TODO host game
             tetris.hostMultiplayerGame();
-            output.setToMultiplayerHostWait("abc", 0);
+            output.setToMultiplayerHostWait();
         });
         hbp.add(hostButton);
 

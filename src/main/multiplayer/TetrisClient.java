@@ -1,12 +1,14 @@
 package main.multiplayer;
 
 import main.Tetris;
+import main.gameHandler.MultiplayerGameClient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,8 +24,9 @@ public class TetrisClient {
     private int playerCount;
     public final int id;
     public int seed;
+    public MultiplayerGameClient multiplayerGameClient = null;
 
-    private TetrisClient(Tetris tetris, String hostName, int port) throws IOException, FailedToCreateException {
+    private TetrisClient(String hostName, int port) throws IOException, FailedToCreateException {
         try {
             tetrisSocket = new Socket(hostName, port);
         } catch (UnknownHostException e) {
@@ -41,7 +44,7 @@ public class TetrisClient {
             in.close();
             throw new FailedToCreateException("Invalid hello message: " + firstLine);
         } else {
-            try {//TODO seed
+            try {
                 board_width = Integer.parseInt(args[1]);
                 board_height = Integer.parseInt(args[2]);
                 playerCount = Integer.parseInt(args[3]);
@@ -57,6 +60,8 @@ public class TetrisClient {
             String inputLine;
             try {
                 inputLine = in.readLine();
+            } catch (SocketException ignored) {
+                return;
             } catch (IOException e) {
                 e.printStackTrace(); //TODO do something to notify user
                 try {
@@ -74,10 +79,13 @@ public class TetrisClient {
             }
             boolean stop = false;
             while (inputLine != null) {
+                System.out.println(inputLine);
                 String[] input = inputLine.split(" ");
                 if (input.length == 0) {
                     try {
                         inputLine = in.readLine();
+                    } catch (SocketException ignored) {
+                        return;
                     } catch (IOException e) {
                         e.printStackTrace();
                         break;
@@ -86,12 +94,22 @@ public class TetrisClient {
                 }
 
                 switch (input[0]) {
-                    case "started":
-                        //TODO
+                    case "start":
+                        if (input.length == 2) {
+                            try {
+                                seed = Integer.parseInt(input[1]);
+                                multiplayerGameClient.start();
+                            } catch (NumberFormatException ignored) {
+                                System.out.println("Invalid server input: " + inputLine);
+                            }
+                        }
+                        if(multiplayerGameClient != null)
+                            multiplayerGameClient.start();
                         running.set(true);
                         break;
                     case "ended":
-                        //TODO
+                        if(multiplayerGameClient != null)
+                            multiplayerGameClient.end();
                         running.set(false);
                         break;
                     case "stopped":
@@ -146,9 +164,9 @@ public class TetrisClient {
         });
     }
 
-    public static TetrisClient createClient(Tetris tetris, String hostName, int port) throws FailedToCreateException {
+    public static TetrisClient createClient(String hostName, int port) throws FailedToCreateException {
         try {
-            return new TetrisClient(tetris, hostName, port);
+            return new TetrisClient(hostName, port);
         } catch (IOException e) {
             e.printStackTrace();
             throw new FailedToCreateException("Failed to create client!");
@@ -188,6 +206,10 @@ public class TetrisClient {
 
     public boolean isRunning() {
         return running.get();
+    }
+
+    public void setMultiplayerGameClient(MultiplayerGameClient multiplayerGameClient) {
+        this.multiplayerGameClient = multiplayerGameClient;
     }
 
     public static class FailedToCreateException extends Exception {

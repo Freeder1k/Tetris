@@ -18,6 +18,7 @@ public class MultiplayerGameClient extends TetrisGame {
     private MultiplayerGameClient(Output output, ScheduledExecutorService timer, TetrisClient multiplayerClient) {
         super(output, timer, new Color[multiplayerClient.board_height][multiplayerClient.board_width]);
         this.multiplayerClient = multiplayerClient;
+        multiplayerClient.setMultiplayerGameClient(this);
 
         if (multiplayerClient.board_height != Tetris.BOARD_HEIGHT || multiplayerClient.board_width != Tetris.BOARD_WIDTH) {
             //TODO set output size
@@ -26,8 +27,8 @@ public class MultiplayerGameClient extends TetrisGame {
         //TODO update output (multiplayerClient.id, playercount, isrunning)
     }
 
-    public static MultiplayerGameClient create(Tetris tetris, Output output, ScheduledExecutorService timer, String hostName, int port) throws TetrisClient.FailedToCreateException {
-        return new MultiplayerGameClient(output, timer, TetrisClient.createClient(tetris, hostName, port));
+    public static MultiplayerGameClient create(Output output, ScheduledExecutorService timer, String hostName, int port) throws TetrisClient.FailedToCreateException {
+        return new MultiplayerGameClient(output, timer, TetrisClient.createClient(hostName, port));
     }
 
 
@@ -36,13 +37,13 @@ public class MultiplayerGameClient extends TetrisGame {
             Arrays.fill(row, Color.BLACK);
         }
 
-        blockQueue = new BlockQueue(multiplayerClient.seed);
-        blockQueue.getActive().moveDown(board);
+        blockQueue = new BlockQueue(multiplayerClient.seed, board);
+        blockQueue.getActive().moveDown();System.out.println(2);
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
 
-        output.startMultiplayerGame(board);
-        output.updateOutput(board, blockQueue, score);//TODO multiplayer out
+        output.startClientMultiplayerGame(board);
+        output.updateOutput(board, blockQueue, score);//TODO multiplayer output
     }
 
     synchronized void placeBlock() {
@@ -55,9 +56,9 @@ public class MultiplayerGameClient extends TetrisGame {
             return;
         }
 
-        placed.addToBoard(board);
+        placed.addToBoard();
 
-        blockQueue.getActive().moveDown(board);
+        blockQueue.getActive().moveDown();
 
         //Move lines down and add new score.
         int amount = 0;
@@ -75,8 +76,14 @@ public class MultiplayerGameClient extends TetrisGame {
                 Arrays.fill(board[Tetris.BOARD_HEIGHT - 1], Color.BLACK);
             }
         }
-        if (amount > 0)
+        if (amount > 0) {
             multiplayerClient.sendLines(amount);
+            receivedLines -= amount;
+        }
+        if(receivedLines > 0) {
+            //TODO add lines
+        }
+        receivedLines = 0;
 
         output.updateOutput(board, blockQueue, score);
 
@@ -85,9 +92,9 @@ public class MultiplayerGameClient extends TetrisGame {
 
     void gameOver() {
         System.out.println("Game over! Score: " + score);
-        multiplayerClient.gameOver();
         nextTimeStep.cancel(true);
-        output.setToMultiplayerGameOverMenu();
+        output.setToMultiplayerGameOver(score, 1); //TODO ranking
+        multiplayerClient.gameOver();
     }
 
     public synchronized void pause() {
@@ -111,5 +118,10 @@ public class MultiplayerGameClient extends TetrisGame {
 
     public void setPlayerCount(int amount) {
         //TODO update output
+    }
+
+    //TODO winner id and ranking
+    public void end() {
+        output.setToMultiplayerClientWait();
     }
 }

@@ -32,7 +32,7 @@ public abstract class TetrisGame {
     synchronized void runTimedStep() {
         if (!isPaused) {
             //Move active block down.
-            if (!blockQueue.getActive().moveDown(board)) {
+            if (!blockQueue.getActive().moveDown()) {
                 placePlanned = true;
                 nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
                 return;
@@ -55,13 +55,13 @@ public abstract class TetrisGame {
         }
         Block block = blockQueue.getActive();
         while (true) {
-            if (!block.moveDown(board)) break;
+            if (!block.moveDown()) break;
         }
         placeBlock();
     }
 
     public synchronized void moveLeft() {
-        if (!blockQueue.getActive().moveLeft(board))
+        if (!blockQueue.getActive().moveLeft())
             return;
 
         output.updateOutput(board, blockQueue, score);
@@ -70,7 +70,7 @@ public abstract class TetrisGame {
     }
 
     public synchronized void moveRight() {
-        if (!blockQueue.getActive().moveRight(board))
+        if (!blockQueue.getActive().moveRight())
             return;
 
         output.updateOutput(board, blockQueue, score);
@@ -79,12 +79,12 @@ public abstract class TetrisGame {
     }
 
     public synchronized void moveDown() {
-        if (!blockQueue.getActive().moveDown(board))
+        if (!blockQueue.getActive().moveDown())
             return;
 
         output.updateOutput(board, blockQueue, score);
 
-        if (!blockQueue.getActive().canMoveDown(board)) {
+        if (!blockQueue.getActive().canMoveDown()) {
             if (!nextTimeStep.cancel(false)) {
                 System.out.println("ERROR: Failed to cancel next time step!");
                 return;
@@ -95,7 +95,7 @@ public abstract class TetrisGame {
     }
 
     public synchronized void rotate() {
-        if (!blockQueue.getActive().rotate(board))
+        if (!blockQueue.getActive().rotate())
             return;
 
         output.updateOutput(board, blockQueue, score);
@@ -109,13 +109,13 @@ public abstract class TetrisGame {
                 System.out.println("ERROR: Failed to cancel next time step!");
                 return;
             }
-            if (blockQueue.getActive().canMoveDown(board)) {
+            if (blockQueue.getActive().canMoveDown()) {
                 placePlanned = false;
                 nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.SECONDS);
             } else
                 nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
         } else {
-            if (!blockQueue.getActive().canMoveDown(board)) {
+            if (!blockQueue.getActive().canMoveDown()) {
                 if (!nextTimeStep.cancel(false)) {
                     System.out.println("ERROR: Failed to cancel next time step!");
                     return;

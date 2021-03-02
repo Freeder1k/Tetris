@@ -1,12 +1,14 @@
 package main.output;
 
+import main.Tetris;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class MultiplayerHostWait extends JPanel {
     private final JLabel playerLabel;
 
-    protected MultiplayerHostWait(Output output, Font titleFont, Font buttonFont, Font labelFont, JPanel colorOptionPanel, JPanel multiplayerBottomPanel) {
+    protected MultiplayerHostWait(Output output, Tetris tetris, Font titleFont, Font buttonFont, Font labelFont, JPanel colorOptionPanel, JPanel multiplayerBottomPanel) {
         this.setLayout(new BorderLayout());
 
         JPanel midPanel = new JPanel();
@@ -40,6 +42,8 @@ public class MultiplayerHostWait extends JPanel {
             startButton.setFont(buttonFont);
         startButton.setText("Start");
         startButton.addActionListener(e -> {
+            output. setToMultiplayerInGame();
+            tetris.startMultiplayerGameAsHost();
             //TODO start game, set to multip in game
         });
         sbp.add(startButton);
@@ -57,6 +61,7 @@ public class MultiplayerHostWait extends JPanel {
         JButton backButton = new JButton();
         backButton.setText("< back");
         backButton.addActionListener(e -> {
+            tetris.leaveMultiplayerGame();
             output.setToMultiplayerMenu();
             //TODO send leave
         });

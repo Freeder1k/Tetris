@@ -22,12 +22,12 @@ public class SinglePlayerGame extends TetrisGame {
             Arrays.fill(row, Color.BLACK);
         }
 
-        blockQueue = new BlockQueue((int) (Math.random() * 10000));
-        blockQueue.getActive().moveDown(board);
+        blockQueue = new BlockQueue((int) (Math.random() * 10000), board);
+        blockQueue.getActive().moveDown();
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
 
-        output.updateOutput(board, blockQueue, score);
+        output.updateSingleplayerOutput(board, blockQueue, score);
     }
 
     synchronized void placeBlock() {
@@ -39,9 +39,9 @@ public class SinglePlayerGame extends TetrisGame {
             return;
         }
 
-        placed.addToBoard(board);
+        placed.addToBoard();
 
-        blockQueue.getActive().moveDown(board);
+        blockQueue.getActive().moveDown();
 
         //Move lines down and add new score.
         for (int i = Tetris.BOARD_HEIGHT - 1; i >= 0; i--) {
@@ -58,7 +58,7 @@ public class SinglePlayerGame extends TetrisGame {
             }
         }
 
-        output.updateOutput(board, blockQueue, score);
+        output.updateSingleplayerOutput(board, blockQueue, score);
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
     }

@@ -76,8 +76,8 @@ public class TetrisServerThread extends Thread{
         }
     }
 
-    public void startGame() {
-        out.println("started");
+    public void startGame(int seed) {
+        out.println("start " + seed);
         running.set(true);
     }
 

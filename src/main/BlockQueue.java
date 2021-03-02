@@ -1,5 +1,6 @@
 package main;
 
+import java.awt.*;
 import java.util.ArrayDeque;
 import java.util.Random;
 
@@ -7,11 +8,13 @@ public class BlockQueue {//TODO board size for blocks or board
     public final int seed;
     private final ArrayDeque<Block> queue;
     private final Random gen;
+    private final Color[][] board;
 
-    public BlockQueue(int seed) {
+    public BlockQueue(int seed, Color[][] board) {
         gen = new Random(seed);
         queue = new ArrayDeque<>(7);
         this.seed = seed;
+        this.board = board;
         for (int i = 0; i < 6; i++) {
             Block newB = newBlock();
             if (newB != null)
@@ -38,19 +41,19 @@ public class BlockQueue {//TODO board size for blocks or board
     private Block newBlock() {
         switch (gen.nextInt(7)) {
             case 0:
-                return Block.createSBlock();
+                return Block.createSBlock(board);
             case 1:
-                return Block.createZBlock();
+                return Block.createZBlock(board);
             case 2:
-                return Block.createCubeBlock();
+                return Block.createCubeBlock(board);
             case 3:
-                return Block.createLBlock();
+                return Block.createLBlock(board);
             case 4:
-                return Block.createJBlock();
+                return Block.createJBlock(board);
             case 5:
-                return Block.createIBlock();
+                return Block.createIBlock(board);
             case 6:
-                return Block.createTBlock();
+                return Block.createTBlock(board);
             default:
                 return null;
         }

@@ -18,10 +18,11 @@ public class MultiplayerGameHost extends TetrisGame {
     private MultiplayerGameHost(Output output, ScheduledExecutorService timer, TetrisServer tetrisServer) {
         super(output, timer, new Color[Tetris.BOARD_HEIGHT][Tetris.BOARD_WIDTH]);
         this.tetrisServer = tetrisServer;
+        tetrisServer.setMultiplayerGameHost(this);
     }
 
     public static MultiplayerGameHost create(Tetris tetris, Output output, ScheduledExecutorService timer) {
-        TetrisServer host = TetrisServer.createServer(tetris);
+        TetrisServer host = TetrisServer.createServer();
         if (host == null)
             return null;
 
@@ -38,12 +39,11 @@ public class MultiplayerGameHost extends TetrisGame {
 
         tetrisServer.startGame(seed);
 
-        blockQueue = new BlockQueue(seed);
-        blockQueue.getActive().moveDown(board);
+        blockQueue = new BlockQueue(seed, board);
+        blockQueue.getActive().moveDown();
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
 
-        output.startMultiplayerGame(board);
         output.updateOutput(board, blockQueue, score);//TODO multiplayer out
     }
 
@@ -57,9 +57,9 @@ public class MultiplayerGameHost extends TetrisGame {
             return;
         }
 
-        placed.addToBoard(board);
+        placed.addToBoard();
 
-        blockQueue.getActive().moveDown(board);
+        blockQueue.getActive().moveDown();
 
         //Move lines down and add new score.
         int amount = 0;
@@ -87,9 +87,9 @@ public class MultiplayerGameHost extends TetrisGame {
 
     void gameOver() {
         System.out.println("Game over! Score: " + score);
-        tetrisServer.removeActivePlayer(0);
         nextTimeStep.cancel(true);
-        output.setToMultiplayerGameOverMenu();
+        output.setToMultiplayerGameOver(score, 1);//TODO ranking
+        tetrisServer.removeActivePlayer(0);
     }
 
     public synchronized void pause() {
@@ -113,5 +113,18 @@ public class MultiplayerGameHost extends TetrisGame {
 
     public void setPlayerCount(int amount) {
         //TODO update output
+    }
+
+    //TODO winner id and ranking
+    public void end() {
+        output.setToMultiplayerHostWait();
+    }
+
+    public String getHostName() {
+        return tetrisServer.getHostName();
+    }
+
+    public int getPort() {
+        return tetrisServer.getPort();
     }
 }

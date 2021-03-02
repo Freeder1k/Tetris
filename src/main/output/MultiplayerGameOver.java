@@ -61,4 +61,8 @@ public class MultiplayerGameOver extends JPanel {
     protected void setPlayerCount(int amount) {
         playerLabel.setText("<html><center>Waiting for all players to finish...<br/>Players left: " + amount + "</center></html>");
     }
+
+    protected void setInfo(int score, int rank) {
+        //TODO
+    }
 }
