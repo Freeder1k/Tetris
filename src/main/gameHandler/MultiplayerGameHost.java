@@ -44,6 +44,8 @@ public class MultiplayerGameHost extends TetrisGame {
         blockQueue = new BlockQueue(seed, board);
         blockQueue.getActive().moveDown();
 
+        receivedLines = 0;
+
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
 
         output.setToMultiplayerInGame(board);
@@ -54,7 +56,7 @@ public class MultiplayerGameHost extends TetrisGame {
         placePlanned = false;
         //Add to board
         Block placed = blockQueue.nextBlock();
-        if (placed.isOnTop() || blockQueue.getActive().overlaps()) {
+        if (placed.isOnTop()) {
             gameOver();
             return;
         }
@@ -84,6 +86,10 @@ public class MultiplayerGameHost extends TetrisGame {
             receivedLines -= amount;
         }
         if (receivedLines > 0) {
+            if(receivedLines > board.length - 2) {
+                gameOver();
+                return;
+            }
             for (int i = board.length - receivedLines - 1; i >= 0; i--) {
                 System.arraycopy(board[i], 0, board[i + receivedLines], 0, board[0].length);
             }
@@ -94,6 +100,11 @@ public class MultiplayerGameHost extends TetrisGame {
             }
         }
         receivedLines = 0;
+
+        if(blockQueue.getActive().overlaps()) {
+            gameOver();
+            return;
+        }
 
         updateOutput();
 

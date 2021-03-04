@@ -9,6 +9,7 @@ public class BlockQueue {
     private final ArrayDeque<Block> queue;
     private final Random gen;
     private final Color[][] board;
+    private int prev = -1;
 
     public BlockQueue(int seed, Color[][] board) {
         gen = new Random(seed);
@@ -39,7 +40,11 @@ public class BlockQueue {
     }
 
     private Block newBlock() {
-        switch (gen.nextInt(7)) {
+        int next = gen.nextInt(7);
+        while(next == prev)
+            next = gen.nextInt(7);
+        prev = next;
+        switch (next) {
             case 0:
                 return Block.createSBlock(board);
             case 1:

@@ -3,7 +3,10 @@ package main.multiplayer;
 import main.gameHandler.MultiplayerGameHost;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.ServerSocket;
+import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.Map;
@@ -78,20 +81,22 @@ public class TetrisServer {
 
     protected synchronized void removeServerThread(Integer id) {
         serverThreads.remove(id);
-        activePlayers.remove(id);
+        removeActivePlayer(id);
         playerCount--;
         multiplayerGameHost.setPlayerCount(playerCount);
         serverThreads.values().forEach(t -> t.setPlayerCount(playerCount));
     }
 
     public synchronized void distributeLines(int senderID, int amount) {
-        int receiverID = activePlayers.get(gen.nextInt(activePlayers.size() - 1));
-        if (receiverID == senderID)
-            receiverID = activePlayers.getLast();
-        if (receiverID == 0)
-            multiplayerGameHost.receiveLines(amount);
-        else
-            serverThreads.get(receiverID).sendLines(amount);
+        if (activePlayers.size() > 1) {
+            int receiverID = activePlayers.get(gen.nextInt(activePlayers.size() - 1));
+            if (receiverID == senderID)
+                receiverID = activePlayers.getLast();
+            if (receiverID == 0)
+                multiplayerGameHost.receiveLines(amount);
+            else
+                serverThreads.get(receiverID).sendLines(amount);
+        }
     }
 
     public synchronized void removeActivePlayer(Integer id) {

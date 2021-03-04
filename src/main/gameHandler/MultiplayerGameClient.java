@@ -38,6 +38,8 @@ public class MultiplayerGameClient extends TetrisGame {
         blockQueue = new BlockQueue(tetrisClient.seed, board);
         blockQueue.getActive().moveDown();
 
+        receivedLines = 0;
+
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
 
         output.setToMultiplayerInGame(board);
@@ -78,6 +80,10 @@ public class MultiplayerGameClient extends TetrisGame {
             receivedLines -= amount;
         }
         if (receivedLines > 0) {
+            if(receivedLines > board.length - 2) {
+                gameOver();
+                return;
+            }
             for (int i = board.length - receivedLines - 1; i >= 0; i--) {
                 System.arraycopy(board[i], 0, board[i + receivedLines], 0, board[0].length);
             }
