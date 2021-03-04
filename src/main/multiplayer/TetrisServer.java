@@ -3,19 +3,17 @@ package main.multiplayer;
 import main.gameHandler.MultiplayerGameHost;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.*;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TetrisServer {
+    public final String hostName;
     private final ServerSocket serverSocket;
     private final Map<Integer, TetrisServerThread> serverThreads = new ConcurrentHashMap<>();
     private final LinkedList<Integer> activePlayers = new LinkedList<>();
@@ -27,9 +25,10 @@ public class TetrisServer {
     private int hostRank = 0;
 
     private TetrisServer() throws IOException {
+        hostName = getHostname();
         serverSocket = new ServerSocket(0);
         System.out.println("HOSTING");
-        System.out.println(InetAddress.getLocalHost().getHostAddress() + ":" + serverSocket.getLocalPort());
+        System.out.println(hostName + ":" + serverSocket.getLocalPort());
         CompletableFuture.runAsync(() -> {
             while (true) {
                 try {
@@ -49,6 +48,22 @@ public class TetrisServer {
                 }
             }
         });
+    }
+
+    private static String getHostname() {
+        Enumeration<NetworkInterface> ne;
+        try {
+            ne = NetworkInterface.getNetworkInterfaces();
+            while (ne.hasMoreElements()) {
+                for (InterfaceAddress f : ne.nextElement().getInterfaceAddresses())
+                    if (f.getAddress().isSiteLocalAddress())
+                        if (!f.getAddress().toString().equals("192.168.56.1"))
+                            return f.getAddress().getHostAddress();
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        return "unknown";
     }
 
     public static TetrisServer createServer() {
@@ -120,11 +135,7 @@ public class TetrisServer {
     }
 
     public String getHostName() {
-        try {
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            return "unknown";
-        }
+        return hostName;
     }
 
     public int getRank() {
