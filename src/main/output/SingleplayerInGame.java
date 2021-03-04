@@ -13,6 +13,7 @@ public class SingleplayerInGame extends JPanel {
     private final JLabel scoreLabel;
 
     protected SingleplayerInGame() {
+        this.setLayout(new BorderLayout());
 
         scoreLabel = new JLabel("Score: 0", SwingConstants.CENTER);
         Font scoreFont = Output.getFont(null, -1, 20, scoreLabel.getFont());
@@ -31,7 +32,7 @@ public class SingleplayerInGame extends JPanel {
 
         Border border = BorderFactory.createLineBorder(Color.GRAY);
         for (int i1 = Tetris.BOARD_HEIGHT - 3; i1 >= 0; i1--) {
-            for (int i2 = 0; i2 < 10; i2++) {
+            for (int i2 = 0; i2 < Tetris.BOARD_WIDTH; i2++) {
                 gameDisplay[i1][i2] = new JPanel();
                 gameDisplay[i1][i2].setBorder(border);
                 gameDisplay[i1][i2].setBackground(Color.BLACK);
@@ -45,7 +46,7 @@ public class SingleplayerInGame extends JPanel {
         scoreLabel.setText("Score: 0");
 
         for (int i1 = Tetris.BOARD_HEIGHT - 3; i1 >= 0; i1--) {
-            for (int i2 = 0; i2 < 10; i2++) {
+            for (int i2 = 0; i2 < Tetris.BOARD_WIDTH; i2++) {
                 gameDisplay[i1][i2].setBackground(Color.BLACK);
             }
         }

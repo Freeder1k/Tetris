@@ -1,6 +1,5 @@
 package main.multiplayer;
 
-import main.Tetris;
 import main.gameHandler.MultiplayerGameClient;
 
 import java.io.BufferedReader;
@@ -16,15 +15,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TetrisClient {
     public final int board_width;
     public final int board_height;
+    public final int id;
     private final Socket tetrisSocket;
     private final PrintWriter out;
     private final BufferedReader in;
     private final AtomicBoolean running;
     private final CompletableFuture<?> serverListener;
-    private int playerCount;
-    public final int id;
     public int seed;
     public MultiplayerGameClient multiplayerGameClient = null;
+    private int playerCount;
+    private int rank = 0;
 
     private TetrisClient(String hostName, int port) throws IOException, FailedToCreateException {
         try {
@@ -63,7 +63,7 @@ public class TetrisClient {
             } catch (SocketException ignored) {
                 return;
             } catch (IOException e) {
-                e.printStackTrace(); //TODO do something to notify user
+                e.printStackTrace();
                 try {
                     tetrisSocket.close();
                 } catch (IOException e2) {
@@ -79,7 +79,6 @@ public class TetrisClient {
             }
             boolean stop = false;
             while (inputLine != null) {
-                System.out.println(inputLine);
                 String[] input = inputLine.split(" ");
                 if (input.length == 0) {
                     try {
@@ -98,18 +97,24 @@ public class TetrisClient {
                         if (input.length == 2) {
                             try {
                                 seed = Integer.parseInt(input[1]);
-                                multiplayerGameClient.start();
+                                if (multiplayerGameClient != null)
+                                    multiplayerGameClient.start();
+                                running.set(true);
+                                rank = playerCount;
                             } catch (NumberFormatException ignored) {
                                 System.out.println("Invalid server input: " + inputLine);
                             }
                         }
-                        if(multiplayerGameClient != null)
-                            multiplayerGameClient.start();
-                        running.set(true);
                         break;
                     case "ended":
-                        if(multiplayerGameClient != null)
-                            multiplayerGameClient.end();
+                        if (input.length == 2) {
+                            try {
+                                if (multiplayerGameClient != null)
+                                    multiplayerGameClient.end(Integer.parseInt(input[1]));
+                            } catch (NumberFormatException ignored) {
+                                System.out.println("Invalid server input: " + inputLine);
+                            }
+                        }
                         running.set(false);
                         break;
                     case "stopped":
@@ -119,8 +124,8 @@ public class TetrisClient {
                         if (running.get()) {
                             if (input.length == 2) {
                                 try {
-                                    int amount = Integer.parseInt(input[1]);
-                                    //TODO do
+                                    if (multiplayerGameClient != null)
+                                        multiplayerGameClient.receiveLines(Integer.parseInt(input[1]));
                                 } catch (NumberFormatException ignored) {
                                     System.out.println("Invalid server input: " + inputLine);
                                 }
@@ -132,24 +137,33 @@ public class TetrisClient {
                             try {
                                 int amount = Integer.parseInt(input[1]);
                                 playerCount = amount;
-                                //TODO tetris.setWaitingPlayers(amount);
+                                multiplayerGameClient.setPlayerCount(amount);
                             } catch (NumberFormatException ignored) {
                                 System.out.println("Invalid server input: " + inputLine);
                             }
                         }
                         break;
+                    case "playerdied":
+                        if (running.get())
+                            rank--;
+                        break;
                 }
 
                 if (stop)
-                    break;//TODO close stuff
+                    break;
 
                 try {
                     inputLine = in.readLine();
+                    System.out.println(inputLine);
+                } catch (SocketException ignored) {
+                    break; //Socket was closed
                 } catch (IOException e) {
                     e.printStackTrace();
                     break;
                 }
             }
+            multiplayerGameClient.stopByHost();
+
             try {
                 tetrisSocket.close();
             } catch (IOException e) {
@@ -184,6 +198,7 @@ public class TetrisClient {
 
     public void shutdown() {
         out.println("stopped");
+        running.set(false);
 
         serverListener.cancel(true);
 
@@ -204,8 +219,8 @@ public class TetrisClient {
         return playerCount;
     }
 
-    public boolean isRunning() {
-        return running.get();
+    public int getRank() {
+        return rank;
     }
 
     public void setMultiplayerGameClient(MultiplayerGameClient multiplayerGameClient) {

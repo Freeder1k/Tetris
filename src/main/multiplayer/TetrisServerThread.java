@@ -2,17 +2,21 @@ package main.multiplayer;
 
 import main.Tetris;
 
-import java.net.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TetrisServerThread extends Thread{
+public class TetrisServerThread extends Thread {
     public final int id;
     private final int playerCount;
     private final Socket socket;
-    private PrintWriter out;
     private final TetrisServer tetrisServer;
     private final AtomicBoolean running;
+    private PrintWriter out;
 
     public TetrisServerThread(Socket socket, int id, int playerCount, TetrisServer tetrisServer, boolean running) {
         super("TetrisServerThread");
@@ -27,24 +31,25 @@ public class TetrisServerThread extends Thread{
         try (
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(
-                                socket.getInputStream()));
+                                socket.getInputStream()))
         ) {
             out = new PrintWriter(socket.getOutputStream(), true);
             String inputLine;
-            out.println("hello: " +  Tetris.BOARD_WIDTH + " " + Tetris.BOARD_HEIGHT + " " + playerCount + " " + id + " " + running.get());
+            out.println("hello: " + Tetris.BOARD_WIDTH + " " + Tetris.BOARD_HEIGHT + " " + playerCount + " " + id + " " + running.get());
 
             boolean stop = false;
             inputLine = in.readLine();
-            while (inputLine!= null) {
+            System.out.println(inputLine);
+            while (inputLine != null) {
                 String[] input = inputLine.split(" ");
-                if(input.length == 0) {
+                if (input.length == 0) {
                     inputLine = in.readLine();
                     continue;
                 }
 
-                switch(input[0]) {
+                switch (input[0]) {
                     case "sentlines":
-                        if(running.get()) {
+                        if (running.get()) {
                             if (input.length == 2) {
                                 try {
                                     tetrisServer.distributeLines(id, Integer.parseInt(input[1]));
@@ -55,7 +60,7 @@ public class TetrisServerThread extends Thread{
                         }
                         break;
                     case "gameover":
-                        if(running.get())
+                        if (running.get())
                             tetrisServer.removeActivePlayer(id);
                         break;
                     case "stopped":
@@ -71,6 +76,7 @@ public class TetrisServerThread extends Thread{
             socket.close();
             out.close();
             tetrisServer.removeServerThread(id);
+        } catch (SocketException ignored) {
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,11 +84,13 @@ public class TetrisServerThread extends Thread{
 
     public void startGame(int seed) {
         out.println("start " + seed);
+        out.println("test");
         running.set(true);
     }
 
     public void endGame(int winnerID) {
         out.println("ended " + winnerID);
+        running.set(false);
     }
 
     public void shutdown() {
@@ -91,11 +99,15 @@ public class TetrisServerThread extends Thread{
         this.interrupt();
     }
 
+    public void playerDied() {
+        out.println("playerdied");
+    }
+
     public void sendLines(int amount) {
-        out.println("sentlines: " + amount);
+        out.println("sentlines " + amount);
     }
 
     public void setPlayerCount(int playerCount) {
-        out.println("playercount: " + playerCount);
+        out.println("playercount " + playerCount);
     }
 }

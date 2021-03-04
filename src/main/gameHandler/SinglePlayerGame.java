@@ -2,8 +2,8 @@ package main.gameHandler;
 
 import main.Block;
 import main.BlockQueue;
-import main.output.Output;
 import main.Tetris;
+import main.output.Output;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -27,14 +27,14 @@ public class SinglePlayerGame extends TetrisGame {
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
 
-        output.updateSingleplayerOutput(board, blockQueue, score);
+        updateOutput();
     }
 
     synchronized void placeBlock() {
         placePlanned = false;
         //Add to board
         Block placed = blockQueue.nextBlock();
-        if (placed.isOnTop()) {
+        if (placed.isOnTop() || blockQueue.getActive().overlaps()) {
             gameOver();
             return;
         }
@@ -58,7 +58,7 @@ public class SinglePlayerGame extends TetrisGame {
             }
         }
 
-        output.updateSingleplayerOutput(board, blockQueue, score);
+        updateOutput();
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
     }
@@ -67,6 +67,11 @@ public class SinglePlayerGame extends TetrisGame {
         System.out.println("Game over! Score: " + score);
         nextTimeStep.cancel(true);
         output.setToSingleplayerGameOver(score);
+    }
+
+    @Override
+    void updateOutput() {
+        output.updateSingleplayerOutput(board, blockQueue, score);
     }
 
     public synchronized void pause() {
@@ -90,7 +95,7 @@ public class SinglePlayerGame extends TetrisGame {
     }
 
     public void stop() {
-        if(nextTimeStep != null)
+        if (nextTimeStep != null)
             nextTimeStep.cancel(true);
     }
 }

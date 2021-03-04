@@ -28,9 +28,7 @@ public class MultiplayerMenu extends JPanel {
         if (buttonFont != null)
             joinButton.setFont(buttonFont);
         joinButton.setText("Join game");
-        joinButton.addActionListener(e -> {
-            output.setToMultiplayerJoin();
-        });
+        joinButton.addActionListener(e -> output.setToMultiplayerJoin());
         jbp.add(joinButton);
 
         JPanel hbp = new JPanel();
@@ -41,11 +39,7 @@ public class MultiplayerMenu extends JPanel {
         if (buttonFont != null)
             hostButton.setFont(buttonFont);
         hostButton.setText("Host game");
-        hostButton.addActionListener(e -> {
-            //TODO host game
-            tetris.hostMultiplayerGame();
-            output.setToMultiplayerHostWait();
-        });
+        hostButton.addActionListener(e -> tetris.hostMultiplayerGame());
         hbp.add(hostButton);
 
         JPanel spacer = new JPanel();
@@ -64,9 +58,7 @@ public class MultiplayerMenu extends JPanel {
 
         JButton backButton = new JButton();
         backButton.setText("< back");
-        backButton.addActionListener(e -> {
-            output.setToMainMenu();
-        });
+        backButton.addActionListener(e -> output.setToMainMenu());
         backPanel.add(backButton);
 
         topPanel.add(colorOptionPanel, BorderLayout.EAST);

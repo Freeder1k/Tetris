@@ -42,9 +42,7 @@ public class MultiplayerHostWait extends JPanel {
             startButton.setFont(buttonFont);
         startButton.setText("Start");
         startButton.addActionListener(e -> {
-            output. setToMultiplayerInGame();
             tetris.startMultiplayerGameAsHost();
-            //TODO start game, set to multip in game
         });
         sbp.add(startButton);
 

@@ -19,6 +19,7 @@ public class Output extends JFrame {
     private final MultiplayerHostWait multiplayerHostWait;
     private final MultiplayerClientWait multiplayerClientWait;
     private final MultiplayerGameOver multiplayerGameOver;
+    private final MultiplayerInGame multiplayerInGame;
 
     public Output(InputListener inputListener, Tetris tetris) {
         this.inputListener = inputListener;
@@ -44,8 +45,9 @@ public class Output extends JFrame {
         multiplayerMenu = new MultiplayerMenu(this, tetris, titleFont, buttonFont, colorOptionPanelManager.create());
         multiplayerJoin = new MultiplayerJoin(this, tetris, titleFont, buttonFont, colorOptionPanelManager.create());
         multiplayerHostWait = new MultiplayerHostWait(this, tetris, titleFont, buttonFont, labelFont, colorOptionPanelManager.create(), multiplayerBottomPanelManager.create());
-        multiplayerClientWait = new MultiplayerClientWait(this, titleFont, buttonFont, labelFont, colorOptionPanelManager.create(), multiplayerBottomPanelManager.create());
-        multiplayerGameOver = new MultiplayerGameOver(this, titleFont, buttonFont, labelFont, colorOptionPanelManager.create(), multiplayerBottomPanelManager.create());
+        multiplayerClientWait = new MultiplayerClientWait(this, tetris, titleFont, buttonFont, labelFont, colorOptionPanelManager.create(), multiplayerBottomPanelManager.create());
+        multiplayerGameOver = new MultiplayerGameOver(this, tetris, titleFont, buttonFont, labelFont, colorOptionPanelManager.create(), multiplayerBottomPanelManager.create());
+        multiplayerInGame = new MultiplayerInGame(multiplayerBottomPanelManager.create());
 
         contentPane.add(mainMenu);
 
@@ -69,16 +71,12 @@ public class Output extends JFrame {
         return new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
     }
 
-    public synchronized void updateOutput(Color[][] board, BlockQueue blockQueue, int score) {
-        singleplayerInGame.update(board, blockQueue, score);
-    }
-
     public synchronized void updateSingleplayerOutput(Color[][] board, BlockQueue blockQueue, int score) {
         singleplayerInGame.update(board, blockQueue, score);
     }
 
     public synchronized void updateMultiplayerOutput(Color[][] board, BlockQueue blockQueue, int score) {
-        singleplayerInGame.update(board, blockQueue, score);
+        multiplayerInGame.update(board, blockQueue, score);
     }
 
     protected synchronized void setToMainMenu() {
@@ -125,7 +123,7 @@ public class Output extends JFrame {
         this.setVisible(true);
     }
 
-    protected synchronized void setToMultiplayerJoin() {
+    public synchronized void setToMultiplayerJoin() {
         contentPane.removeAll();
         contentPane.repaint();
 
@@ -164,18 +162,46 @@ public class Output extends JFrame {
         this.setVisible(true);
     }
 
-    protected void setToMultiplayerInGame() {
-        setToSingleplayerInGame();//TODO
+    public synchronized void setToMultiplayerInGame(Color[][] board) {
+        multiplayerInGame.resetBoard(board.length, board[0].length);
+
+        contentPane.removeAll();
+        contentPane.repaint();
+
+        this.setSize(board[0].length * 30 + 50, board.length * 30 + 100);
+
+        contentPane.add(multiplayerInGame);
+
+        contentPane.requestFocusInWindow();
+        contentPane.addKeyListener(inputListener);
+
+        this.setVisible(true);
     }
 
-    public void setMultiplayerInfo(String hostName, int port) {
+    public synchronized void setToMultiplayerHostWait(int winnerID, int rank) {
+        //TODO
+        setToMultiplayerHostWait();
+    }
+
+    public synchronized void setToMultiplayerClientWait(int winnerID, int rank) {
+        //TODO
+        setToMultiplayerClientWait();
+    }
+
+    public synchronized void setMultiplayerInfo(String hostName, int port) {
         multiplayerBottomPanelManager.setInfo(hostName, port);
 
         this.setVisible(true);
     }
 
-    public void startClientMultiplayerGame(Color[][] board) {
-        //TODO set to multiplayer in game + frame resize if necessary
-        setToSingleplayerInGame();
+    public synchronized void setMultiplayerID(int id) {
+        multiplayerBottomPanelManager.setID(id);
+        this.setVisible(true);
+    }
+
+    public synchronized void setPlayerCount(int amount) {
+        multiplayerClientWait.setPlayerCount(amount);
+        multiplayerHostWait.setPlayerCount(amount);
+        this.setVisible(true);
     }
 }

@@ -4,7 +4,7 @@ import java.awt.*;
 import java.util.ArrayDeque;
 import java.util.Random;
 
-public class BlockQueue {//TODO board size for blocks or board
+public class BlockQueue {
     public final int seed;
     private final ArrayDeque<Block> queue;
     private final Random gen;

@@ -3,7 +3,7 @@ package main;
 import java.awt.*;
 import java.util.Arrays;
 
-public class Block {//TODO board size or board
+public class Block {
     private final int[][] points;
     private final int bBoxWidth;
     private final Color color;
@@ -99,7 +99,7 @@ public class Block {//TODO board size or board
         return true;
     }
 
-    private boolean overlaps() {
+    public boolean overlaps() {
         for (int[] point : points) {
             int y = yPos + point[1];
             int x = xPos + point[0];

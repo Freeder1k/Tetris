@@ -1,12 +1,14 @@
 package main.output;
 
+import main.Tetris;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class MultiplayerClientWait extends JPanel {
     private final JLabel playerLabel;
 
-    protected MultiplayerClientWait(Output output, Font titleFont, Font buttonFont, Font labelFont, JPanel colorOptionPanel, JPanel multiplayerBottomPanel) {
+    protected MultiplayerClientWait(Output output, Tetris tetris, Font titleFont, Font buttonFont, Font labelFont, JPanel colorOptionPanel, JPanel multiplayerBottomPanel) {
         this.setLayout(new BorderLayout());
 
         JPanel midPanel = new JPanel();
@@ -50,8 +52,8 @@ public class MultiplayerClientWait extends JPanel {
         JButton backButton = new JButton();
         backButton.setText("< back");
         backButton.addActionListener(e -> {
-            output.setToMultiplayerMenu();
-            //TODO send leave to server
+            tetris.leaveMultiplayerGame();
+            output.setToMultiplayerJoin();
         });
         backPanel.add(backButton);
 

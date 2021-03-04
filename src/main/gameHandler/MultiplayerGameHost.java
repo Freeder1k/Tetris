@@ -2,9 +2,9 @@ package main.gameHandler;
 
 import main.Block;
 import main.BlockQueue;
-import main.output.Output;
 import main.Tetris;
 import main.multiplayer.TetrisServer;
+import main.output.Output;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -19,9 +19,11 @@ public class MultiplayerGameHost extends TetrisGame {
         super(output, timer, new Color[Tetris.BOARD_HEIGHT][Tetris.BOARD_WIDTH]);
         this.tetrisServer = tetrisServer;
         tetrisServer.setMultiplayerGameHost(this);
+        output.setMultiplayerID(0);
+        output.setPlayerCount(1);
     }
 
-    public static MultiplayerGameHost create(Tetris tetris, Output output, ScheduledExecutorService timer) {
+    public static MultiplayerGameHost create(Output output, ScheduledExecutorService timer) {
         TetrisServer host = TetrisServer.createServer();
         if (host == null)
             return null;
@@ -44,15 +46,15 @@ public class MultiplayerGameHost extends TetrisGame {
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
 
-        output.updateOutput(board, blockQueue, score);//TODO multiplayer out
+        output.setToMultiplayerInGame(board);
+        updateOutput();
     }
 
     synchronized void placeBlock() {
-        //TODO add lines
         placePlanned = false;
         //Add to board
         Block placed = blockQueue.nextBlock();
-        if (placed.isOnTop()) {
+        if (placed.isOnTop() || blockQueue.getActive().overlaps()) {
             gameOver();
             return;
         }
@@ -77,10 +79,23 @@ public class MultiplayerGameHost extends TetrisGame {
                 Arrays.fill(board[Tetris.BOARD_HEIGHT - 1], Color.BLACK);
             }
         }
-        if (amount > 0)
+        if (amount > 0) {
             tetrisServer.distributeLines(0, amount);
+            receivedLines -= amount;
+        }
+        if (receivedLines > 0) {
+            for (int i = board.length - receivedLines - 1; i >= 0; i--) {
+                System.arraycopy(board[i], 0, board[i + receivedLines], 0, board[0].length);
+            }
+            int gap = (int) (Math.random() * board[0].length);
+            for (int i = 0; i < receivedLines; i++) {
+                Arrays.fill(board[i], Color.LIGHT_GRAY);
+                board[i][gap] = Color.BLACK;
+            }
+        }
+        receivedLines = 0;
 
-        output.updateOutput(board, blockQueue, score);
+        updateOutput();
 
         nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
     }
@@ -88,8 +103,15 @@ public class MultiplayerGameHost extends TetrisGame {
     void gameOver() {
         System.out.println("Game over! Score: " + score);
         nextTimeStep.cancel(true);
-        output.setToMultiplayerGameOver(score, 1);//TODO ranking
         tetrisServer.removeActivePlayer(0);
+        int rank = tetrisServer.getRank();
+        if(rank != 1)
+            output.setToMultiplayerGameOver(score, rank);
+    }
+
+    @Override
+    void updateOutput() {
+        output.updateMultiplayerOutput(board, blockQueue, score);
     }
 
     public synchronized void pause() {
@@ -102,22 +124,20 @@ public class MultiplayerGameHost extends TetrisGame {
 
     public void stop() {
         tetrisServer.shutdown();
-        if(nextTimeStep != null)
+        if (nextTimeStep != null)
             nextTimeStep.cancel(true);
     }
 
     public synchronized void receiveLines(int amount) {
         receivedLines += amount;
-        //TODO update output
     }
 
     public void setPlayerCount(int amount) {
-        //TODO update output
+        output.setPlayerCount(amount);
     }
 
-    //TODO winner id and ranking
-    public void end() {
-        output.setToMultiplayerHostWait();
+    public void end(int winnerID) {
+        output.setToMultiplayerHostWait(winnerID, tetrisServer.getRank());
     }
 
     public String getHostName() {

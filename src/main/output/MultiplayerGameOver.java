@@ -1,12 +1,14 @@
 package main.output;
 
+import main.Tetris;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class MultiplayerGameOver extends JPanel {
-    private final JLabel playerLabel;
+    private final JLabel infoLabel;
 
-    protected MultiplayerGameOver(Output output, Font titleFont, Font buttonFont, Font labelFont, JPanel colorOptionPanel, JPanel multiplayerBottomPanel) {
+    protected MultiplayerGameOver(Output output, Tetris tetris, Font titleFont, Font buttonFont, Font labelFont, JPanel colorOptionPanel, JPanel multiplayerBottomPanel) {
         this.setLayout(new BorderLayout());
 
         JPanel midPanel = new JPanel();
@@ -20,12 +22,12 @@ public class MultiplayerGameOver extends JPanel {
         gameOverLabel.setHorizontalTextPosition(SwingConstants.CENTER);
         midPanel.add(gameOverLabel, BorderLayout.CENTER);
 
-        playerLabel = new JLabel();
+        infoLabel = new JLabel();
         if (labelFont != null)
-            playerLabel.setFont(labelFont);
-        playerLabel.setText("<html><center>Waiting for all players to finish...<br/>Players left: 1</center></html>");
-        playerLabel.setHorizontalAlignment(0);
-        midPanel.add(playerLabel, BorderLayout.SOUTH);
+            infoLabel.setFont(labelFont);
+        infoLabel.setText("<html><center>Waiting for all players to finish...<br/>Your rank: 1</center></html>");
+        infoLabel.setHorizontalAlignment(0);
+        midPanel.add(infoLabel, BorderLayout.SOUTH);
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new BorderLayout());
@@ -50,19 +52,15 @@ public class MultiplayerGameOver extends JPanel {
         JButton backButton = new JButton();
         backButton.setText("< back");
         backButton.addActionListener(e -> {
+            tetris.leaveMultiplayerGame();
             output.setToMultiplayerMenu();
-            //TODO send leave
         });
         backPanel.add(backButton);
 
         topPanel.add(colorOptionPanel, BorderLayout.EAST);
     }
 
-    protected void setPlayerCount(int amount) {
-        playerLabel.setText("<html><center>Waiting for all players to finish...<br/>Players left: " + amount + "</center></html>");
-    }
-
-    protected void setInfo(int score, int rank) {
-        //TODO
+    protected void setInfo(int score, int rank) {//TODO score
+        infoLabel.setText("<html><center>Waiting for all players to finish...<br/>Your rank: " + rank + "</center></html>");
     }
 }

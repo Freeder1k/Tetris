@@ -10,8 +10,7 @@ public class MultiplayerJoin extends JPanel {
         this.setLayout(new BorderLayout());
 
         JLabel gameOverLabel = new JLabel("<html><center>MULTI<br/>PLAYER</center></html>");
-        if (titleFont != null)
-            gameOverLabel.setFont(titleFont);
+        gameOverLabel.setFont(titleFont);
         gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gameOverLabel.setHorizontalTextPosition(SwingConstants.CENTER);
         this.add(gameOverLabel, BorderLayout.CENTER);
@@ -30,15 +29,13 @@ public class MultiplayerJoin extends JPanel {
 
         JLabel hostNameLabel = new JLabel();
         Font labelFont = Output.getFont(null, -1, 20, hostNameLabel.getFont());
-        if (labelFont != null)
-            hostNameLabel.setFont(labelFont);
+        hostNameLabel.setFont(labelFont);
         hostNameLabel.setText("Host name:");
         hostNamePanel.add(hostNameLabel);
 
         JTextField hostNameTextField = new JTextField();
         hostNameTextField.setColumns(10);
-        if (labelFont != null)
-            hostNameTextField.setFont(labelFont);
+        hostNameTextField.setFont(labelFont);
         hostNameTextField.setText("");
         hostNameTextField.setToolTipText("Host name");
         hostNamePanel.add(hostNameTextField);
@@ -48,15 +45,13 @@ public class MultiplayerJoin extends JPanel {
         entryPanel.add(portPanel, BorderLayout.SOUTH);
 
         JLabel portLabel = new JLabel();
-        if (labelFont != null)
-            portLabel.setFont(labelFont);
+        portLabel.setFont(labelFont);
         portLabel.setText("          Port:");
         portPanel.add(portLabel);
 
         JTextField portTextField = new JTextField();
         portTextField.setColumns(10);
-        if (labelFont != null)
-            portTextField.setFont(labelFont);
+        portTextField.setFont(labelFont);
         portTextField.setText("");
         portTextField.setToolTipText("Port");
         portPanel.add(portTextField);
@@ -66,14 +61,9 @@ public class MultiplayerJoin extends JPanel {
         buttonPanel.add(jbp, BorderLayout.CENTER);
 
         JButton joinButton = new JButton();
-        if (buttonFont != null)
-            joinButton.setFont(buttonFont);
+        joinButton.setFont(buttonFont);
         joinButton.setText("Join");
-        joinButton.addActionListener(e -> {
-            //TODO check data and join if can and then set to multip client waiting
-            tetris.joinMultiplayerGame(hostNameTextField.getText(), Integer.parseInt(portTextField.getText()));
-            output.setToMultiplayerClientWait();
-        });
+        joinButton.addActionListener(e -> tetris.joinMultiplayerGame(hostNameTextField.getText(), Integer.parseInt(portTextField.getText())));
         jbp.add(joinButton);
 
         JPanel spacer = new JPanel();
@@ -92,9 +82,7 @@ public class MultiplayerJoin extends JPanel {
 
         JButton backButton = new JButton();
         backButton.setText("< back");
-        backButton.addActionListener(e -> {
-            output.setToMultiplayerMenu();
-        });
+        backButton.addActionListener(e -> output.setToMultiplayerMenu());
         backPanel.add(backButton);
 
         topPanel.add(colorOptionPanel, BorderLayout.EAST);

@@ -42,16 +42,13 @@ public class Tetris {
         multiplayerGameHost.start();
     }
 
-    public void startMultiplayerClientGame() {
-        multiplayerGameClient.start();
-    }
-
     public boolean hostMultiplayerGame() {
-        multiplayerGameHost = MultiplayerGameHost.create(this, output, timer);
+        multiplayerGameHost = MultiplayerGameHost.create(output, timer);
         if (multiplayerGameHost == null)
             return false;//TODO
 
         output.setMultiplayerInfo(multiplayerGameHost.getHostName(), multiplayerGameHost.getPort());
+        output.setToMultiplayerHostWait();
 
         inputListener.setGameHandler(multiplayerGameHost);
         return true;
@@ -67,6 +64,7 @@ public class Tetris {
         }
 
         output.setMultiplayerInfo(hostName, port);
+        output.setToMultiplayerClientWait();
 
         inputListener.setGameHandler(multiplayerGameClient);
         return true;

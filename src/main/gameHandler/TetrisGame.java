@@ -14,9 +14,9 @@ public abstract class TetrisGame {
     final static int PLACE_DELAY = 500; //Milliseconds
     final Output output;
     final ScheduledExecutorService timer;
+    final Color[][] board;
     ScheduledFuture<?> nextTimeStep;
     BlockQueue blockQueue;
-    final Color[][] board;
     int score = 0;
     boolean isPaused = false;
     boolean placePlanned = false;
@@ -38,7 +38,7 @@ public abstract class TetrisGame {
                 return;
             }
 
-            output.updateOutput(board, blockQueue, score);
+            updateOutput();
 
             nextTimeStep = timer.schedule(this::runTimedStep, MOVE_DELAY, TimeUnit.MILLISECONDS);
         }
@@ -64,7 +64,7 @@ public abstract class TetrisGame {
         if (!blockQueue.getActive().moveLeft())
             return;
 
-        output.updateOutput(board, blockQueue, score);
+        updateOutput();
 
         checkMove();
     }
@@ -73,7 +73,7 @@ public abstract class TetrisGame {
         if (!blockQueue.getActive().moveRight())
             return;
 
-        output.updateOutput(board, blockQueue, score);
+        updateOutput();
 
         checkMove();
     }
@@ -82,7 +82,7 @@ public abstract class TetrisGame {
         if (!blockQueue.getActive().moveDown())
             return;
 
-        output.updateOutput(board, blockQueue, score);
+        updateOutput();
 
         if (!blockQueue.getActive().canMoveDown()) {
             if (!nextTimeStep.cancel(false)) {
@@ -98,7 +98,7 @@ public abstract class TetrisGame {
         if (!blockQueue.getActive().rotate())
             return;
 
-        output.updateOutput(board, blockQueue, score);
+        updateOutput();
 
         checkMove();
     }
@@ -125,6 +125,8 @@ public abstract class TetrisGame {
             }
         }
     }
+
+    abstract void updateOutput();
 
     public abstract void pause();
 
