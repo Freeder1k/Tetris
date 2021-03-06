@@ -8,7 +8,6 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Output extends JFrame {
-    private final InputListener inputListener;
     private final Container contentPane;
     private final MainMenu mainMenu;
     private final SingleplayerInGame singleplayerInGame;
@@ -22,7 +21,6 @@ public class Output extends JFrame {
     private final MultiplayerInGame multiplayerInGame;
 
     public Output(InputListener inputListener, Tetris tetris) {
-        this.inputListener = inputListener;
 
         this.setSize(Tetris.BOARD_WIDTH * 30 + 50, Tetris.BOARD_HEIGHT * 30 + 50);
         this.setResizable(false);
@@ -46,12 +44,14 @@ public class Output extends JFrame {
         multiplayerJoin = new MultiplayerJoin(this, tetris, titleFont, buttonFont, colorOptionPanelManager.create());
         multiplayerHostWait = new MultiplayerHostWait(this, tetris, titleFont, buttonFont, labelFont, colorOptionPanelManager.create(), multiplayerBottomPanelManager.create());
         multiplayerClientWait = new MultiplayerClientWait(this, tetris, titleFont, buttonFont, labelFont, colorOptionPanelManager.create(), multiplayerBottomPanelManager.create());
-        multiplayerGameOver = new MultiplayerGameOver(this, tetris, titleFont, buttonFont, labelFont, colorOptionPanelManager.create(), multiplayerBottomPanelManager.create());
+        multiplayerGameOver = new MultiplayerGameOver(this, tetris, titleFont, labelFont, colorOptionPanelManager.create(), multiplayerBottomPanelManager.create());
         multiplayerInGame = new MultiplayerInGame(multiplayerBottomPanelManager.create());
 
         contentPane.add(mainMenu);
 
         this.addWindowListener(inputListener);
+        singleplayerInGame.addKeyListener(inputListener);
+        multiplayerInGame.addKeyListener(inputListener);
         this.setVisible(true);
     }
 
@@ -85,7 +85,7 @@ public class Output extends JFrame {
 
         contentPane.add(mainMenu);
 
-        this.setVisible(true);
+        this.revalidate();
     }
 
     protected synchronized void setToSingleplayerInGame() {
@@ -96,21 +96,19 @@ public class Output extends JFrame {
 
         contentPane.add(singleplayerInGame);
 
-        contentPane.requestFocusInWindow();
-        contentPane.addKeyListener(inputListener);
+        singleplayerInGame.requestFocusInWindow();
 
-        this.setVisible(true);
+        this.revalidate();
     }
 
     public synchronized void setToSingleplayerGameOver(int score) {
         contentPane.removeAll();
         contentPane.repaint();
-        contentPane.removeKeyListener(inputListener);
 
         singleplayerGameOver.setScore(score);
         contentPane.add(singleplayerGameOver);
 
-        this.setVisible(true);
+        this.revalidate();
     }
 
 
@@ -119,8 +117,8 @@ public class Output extends JFrame {
         contentPane.repaint();
 
         contentPane.add(multiplayerMenu);
-
-        this.setVisible(true);
+        
+        this.revalidate();
     }
 
     public synchronized void setToMultiplayerJoin() {
@@ -129,7 +127,7 @@ public class Output extends JFrame {
 
         contentPane.add(multiplayerJoin);
 
-        this.setVisible(true);
+        this.revalidate();
     }
 
     public synchronized void setToMultiplayerHostWait() {
@@ -138,7 +136,7 @@ public class Output extends JFrame {
 
         contentPane.add(multiplayerHostWait);
 
-        this.setVisible(true);
+        this.revalidate();
     }
 
     public synchronized void setToMultiplayerClientWait() {
@@ -147,19 +145,18 @@ public class Output extends JFrame {
 
         contentPane.add(multiplayerClientWait);
 
-        this.setVisible(true);
+        this.revalidate();
     }
 
     public synchronized void setToMultiplayerGameOver(int score, int ranking) {
         contentPane.removeAll();
         contentPane.repaint();
-        contentPane.removeKeyListener(inputListener);
 
-        multiplayerGameOver.setInfo(score, ranking);
+        multiplayerGameOver.setInfo(score, ranking); //TODO score
 
         contentPane.add(multiplayerGameOver);
 
-        this.setVisible(true);
+        this.revalidate();
     }
 
     public synchronized void setToMultiplayerInGame(Color[][] board) {
@@ -172,10 +169,9 @@ public class Output extends JFrame {
 
         contentPane.add(multiplayerInGame);
 
-        contentPane.requestFocusInWindow();
-        contentPane.addKeyListener(inputListener);
+        multiplayerInGame.requestFocusInWindow();
 
-        this.setVisible(true);
+        this.revalidate();
     }
 
     public synchronized void setToMultiplayerHostWait(int winnerID, int rank) {
@@ -191,17 +187,21 @@ public class Output extends JFrame {
     public synchronized void setMultiplayerInfo(String hostName, int port) {
         multiplayerBottomPanelManager.setInfo(hostName, port);
 
-        this.setVisible(true);
+        this.revalidate();
     }
 
     public synchronized void setMultiplayerID(int id) {
         multiplayerBottomPanelManager.setID(id);
-        this.setVisible(true);
+        this.revalidate();
     }
 
     public synchronized void setPlayerCount(int amount) {
         multiplayerClientWait.setPlayerCount(amount);
         multiplayerHostWait.setPlayerCount(amount);
-        this.setVisible(true);
+        this.revalidate();
+    }
+
+    protected synchronized void setColorMode(int mode) {
+        //TODO
     }
 }

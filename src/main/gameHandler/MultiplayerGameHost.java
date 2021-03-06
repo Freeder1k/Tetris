@@ -86,7 +86,7 @@ public class MultiplayerGameHost extends TetrisGame {
             receivedLines -= amount;
         }
         if (receivedLines > 0) {
-            if(receivedLines > board.length - 2) {
+            if (receivedLines > board.length - 2) {
                 gameOver();
                 return;
             }
@@ -101,7 +101,7 @@ public class MultiplayerGameHost extends TetrisGame {
         }
         receivedLines = 0;
 
-        if(blockQueue.getActive().overlaps()) {
+        if (blockQueue.getActive().overlaps()) {
             gameOver();
             return;
         }
@@ -116,7 +116,7 @@ public class MultiplayerGameHost extends TetrisGame {
         nextTimeStep.cancel(true);
         tetrisServer.removeActivePlayer(0);
         int rank = tetrisServer.getRank();
-        if(rank != 1)
+        if (rank != 1)
             output.setToMultiplayerGameOver(score, rank);
     }
 

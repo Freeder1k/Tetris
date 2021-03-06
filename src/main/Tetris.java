@@ -29,7 +29,7 @@ public class Tetris {
         new Tetris();
     }
 
-    public void startSingleplayerGame() {
+    public void startSinglePlayerGame() {
         if (singlePlayerGame == null) {
             singlePlayerGame = new SinglePlayerGame(output, timer);
         }
@@ -42,32 +42,33 @@ public class Tetris {
         multiplayerGameHost.start();
     }
 
-    public boolean hostMultiplayerGame() {
+    public void hostMultiplayerGame() {
         multiplayerGameHost = MultiplayerGameHost.create(output, timer);
-        if (multiplayerGameHost == null)
-            return false;//TODO
+        if (multiplayerGameHost == null) {
+            //TODO
+            System.out.println("FAILED TO CREATE HOST SERVER!");
+            return;
+        }
 
         output.setMultiplayerInfo(multiplayerGameHost.getHostName(), multiplayerGameHost.getPort());
         output.setToMultiplayerHostWait();
 
         inputListener.setGameHandler(multiplayerGameHost);
-        return true;
     }
 
-    public boolean joinMultiplayerGame(String hostName, int port) {
+    public void joinMultiplayerGame(String hostName, int port) {
         try {
             multiplayerGameClient = MultiplayerGameClient.create(output, timer, hostName, port);
         } catch (TetrisClient.FailedToCreateException e) {
             //TODO
             System.out.println(e.getMessage());
-            return false;
+            return;
         }
 
         output.setMultiplayerInfo(hostName, port);
         output.setToMultiplayerClientWait();
 
         inputListener.setGameHandler(multiplayerGameClient);
-        return true;
     }
 
     public void leaveMultiplayerGame() {

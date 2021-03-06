@@ -41,9 +41,7 @@ public class MultiplayerHostWait extends JPanel {
         if (buttonFont != null)
             startButton.setFont(buttonFont);
         startButton.setText("Start");
-        startButton.addActionListener(e -> {
-            tetris.startMultiplayerGameAsHost();
-        });
+        startButton.addActionListener(e -> tetris.startMultiplayerGameAsHost());
         sbp.add(startButton);
 
         bottomPanel.add(multiplayerBottomPanel, BorderLayout.SOUTH);
@@ -61,7 +59,6 @@ public class MultiplayerHostWait extends JPanel {
         backButton.addActionListener(e -> {
             tetris.leaveMultiplayerGame();
             output.setToMultiplayerMenu();
-            //TODO send leave
         });
         backPanel.add(backButton);
 

@@ -30,7 +30,7 @@ public class MainMenu extends JPanel {
         singleplayerButton.setText("Singleplayer");
         singleplayerButton.addActionListener(e -> {
             output.setToSingleplayerInGame();
-            tetris.startSingleplayerGame();
+            tetris.startSinglePlayerGame();
         });
         spp.add(singleplayerButton);
 
@@ -42,9 +42,7 @@ public class MainMenu extends JPanel {
         if (buttonFont != null)
             multiplayerButton.setFont(buttonFont);
         multiplayerButton.setText("Multiplayer");
-        multiplayerButton.addActionListener(e -> {
-            output.setToMultiplayerMenu();
-        });
+        multiplayerButton.addActionListener(e -> output.setToMultiplayerMenu());
         mpp.add(multiplayerButton);
 
         JPanel spacer = new JPanel();

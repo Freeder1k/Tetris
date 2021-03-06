@@ -55,11 +55,6 @@ public class Block {
     }
 
     public synchronized boolean rotate() {
-        if (rotation == 3)
-            rotation = 0;
-        else
-            rotation++;
-
         for (int[] point : points) {
             int xNew = bBoxWidth - 1 - point[0];
             int yNew = point[1];
@@ -67,7 +62,21 @@ public class Block {
             point[1] = xNew;
         }
 
-        //TODO wallkicks https://tetris.fandom.com/wiki/SRS
+        //TODO wallkicks https://tetris.fandom.com/wiki/SRS#Wall_Kicks
+        if (overlaps()) {
+            for (int[] point : points) {
+                int xNew = point[0];
+                int yNew = bBoxWidth - 1 - point[1];
+                point[0] = yNew;
+                point[1] = xNew;
+            }
+            return false;
+        }
+
+        if (rotation == 3)
+            rotation = 0;
+        else
+            rotation++;
 
         return true;
     }

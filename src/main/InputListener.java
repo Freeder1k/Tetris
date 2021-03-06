@@ -22,7 +22,7 @@ public class InputListener implements KeyListener, WindowListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(gameHandler == null)
+        if (gameHandler == null)
             return;
         switch (e.getKeyCode()) {
             case 32:
@@ -57,41 +57,41 @@ public class InputListener implements KeyListener, WindowListener {
     @Override
     public void windowClosing(WindowEvent e) {
         tetris.stop();
-        if(gameHandler != null)
+        if (gameHandler != null)
             gameHandler.stop();
     }
 
     @Override
     public void windowClosed(WindowEvent e) {
         tetris.stop();
-        if(gameHandler != null)
+        if (gameHandler != null)
             gameHandler.stop();
     }
 
     @Override
     public void windowIconified(WindowEvent e) {
-        if(gameHandler != null)
+        if (gameHandler != null)
             gameHandler.pause();
     }
 
     @Override
     public void windowDeiconified(WindowEvent e) {
-        if(gameHandler != null)
+        if (gameHandler != null)
             gameHandler.resume();
     }
 
     @Override
     public void windowActivated(WindowEvent e) {
-        if(gameHandler != null)
+        if (gameHandler != null)
             gameHandler.resume();
     }
 
     @Override
     public void windowDeactivated(WindowEvent e) {
-        if(gameHandler != null)
+        if (gameHandler != null)
             gameHandler.pause();
     }
-    
+
     public void setGameHandler(TetrisGame gameHandler) {
         this.gameHandler = gameHandler;
     }

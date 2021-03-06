@@ -38,7 +38,7 @@ public class SingleplayerGameOver extends JPanel {
         retryButton.setText("Play again");
         retryButton.addActionListener(e -> {
             output.setToSingleplayerInGame();
-            tetris.startSingleplayerGame();
+            tetris.startSinglePlayerGame();
         });
         spp.add(retryButton);
 
@@ -58,9 +58,7 @@ public class SingleplayerGameOver extends JPanel {
 
         JButton backButton = new JButton();
         backButton.setText("< back");
-        backButton.addActionListener(e -> {
-            output.setToMainMenu();
-        });
+        backButton.addActionListener(e -> output.setToMainMenu());
         backPanel.add(backButton);
 
         topPanel.add(colorOptionPanel, BorderLayout.EAST);

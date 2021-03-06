@@ -47,7 +47,7 @@ public class ColorOptionPanelManager {
                         break;
                 }
                 comboboxes.forEach(b -> b.setSelectedIndex(selectedIndex));
-                //TODO output.updatecolormode
+                output.setColorMode(selectedIndex);
             }
         });
         colorOptionPanel.add(colorBox, BorderLayout.WEST);

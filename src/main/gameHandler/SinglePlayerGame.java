@@ -76,7 +76,7 @@ public class SinglePlayerGame extends TetrisGame {
 
     public synchronized void pause() {
         if (nextTimeStep != null) {
-            if (!nextTimeStep.cancel(false)) {
+            if (!nextTimeStep.isCancelled() && !nextTimeStep.cancel(false)) {
                 System.out.println("ERROR: Failed to cancel next time step!");
                 return;
             }

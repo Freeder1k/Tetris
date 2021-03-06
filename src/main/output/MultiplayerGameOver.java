@@ -8,7 +8,7 @@ import java.awt.*;
 public class MultiplayerGameOver extends JPanel {
     private final JLabel infoLabel;
 
-    protected MultiplayerGameOver(Output output, Tetris tetris, Font titleFont, Font buttonFont, Font labelFont, JPanel colorOptionPanel, JPanel multiplayerBottomPanel) {
+    protected MultiplayerGameOver(Output output, Tetris tetris, Font titleFont, Font labelFont, JPanel colorOptionPanel, JPanel multiplayerBottomPanel) {
         this.setLayout(new BorderLayout());
 
         JPanel midPanel = new JPanel();

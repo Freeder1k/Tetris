@@ -21,8 +21,6 @@ public class MultiplayerGameClient extends TetrisGame {
         tetrisClient.setMultiplayerGameClient(this);
         output.setMultiplayerID(tetrisClient.id);
         output.setPlayerCount(tetrisClient.getPlayerCount());
-
-        //TODO is running?
     }
 
     public static MultiplayerGameClient create(Output output, ScheduledExecutorService timer, String hostName, int port) throws TetrisClient.FailedToCreateException {
@@ -80,7 +78,7 @@ public class MultiplayerGameClient extends TetrisGame {
             receivedLines -= amount;
         }
         if (receivedLines > 0) {
-            if(receivedLines > board.length - 2) {
+            if (receivedLines > board.length - 2) {
                 gameOver();
                 return;
             }

@@ -6,7 +6,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.*;
+import java.net.ConnectException;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -26,10 +29,7 @@ public class TetrisClient {
 
     private TetrisClient(String hostName, int port) throws IOException, FailedToCreateException {
         try {
-            InetSocketAddress endPoint = new InetSocketAddress(hostName, port);
-            tetrisSocket = new Socket();
-            tetrisSocket.connect(endPoint);
-            //tetrisSocket = new Socket(hostName, port);
+            tetrisSocket = new Socket(hostName, port);
         } catch (UnknownHostException e) {
             throw new FailedToCreateException("Unknown host: " + hostName);
         } catch (ConnectException e) {

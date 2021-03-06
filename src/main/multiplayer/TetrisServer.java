@@ -30,8 +30,7 @@ public class TetrisServer {
     private TetrisServer() throws IOException {
         hostName = getHostname();
         serverSocket = new ServerSocket(0);
-        System.out.println("HOSTING");
-        System.out.println(hostName + ":" + serverSocket.getLocalPort());
+        System.out.println("HOSTING (" + hostName + ":" + serverSocket.getLocalPort() + ")");
         CompletableFuture.runAsync(() -> {
             while (true) {
                 try {

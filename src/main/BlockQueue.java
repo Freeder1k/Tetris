@@ -41,7 +41,7 @@ public class BlockQueue {
 
     private Block newBlock() {
         int next = gen.nextInt(7);
-        while(next == prev)
+        while (next == prev)
             next = gen.nextInt(7);
         prev = next;
         switch (next) {

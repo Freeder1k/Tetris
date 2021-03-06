@@ -49,7 +49,7 @@ public abstract class TetrisGame {
     abstract void gameOver();
 
     public synchronized void drop() {
-        if (!nextTimeStep.cancel(false)) {
+        if (!nextTimeStep.isCancelled() && !nextTimeStep.cancel(false)) {
             System.out.println("ERROR: Failed to cancel next time step!");
             return;
         }
@@ -85,7 +85,7 @@ public abstract class TetrisGame {
         updateOutput();
 
         if (!blockQueue.getActive().canMoveDown()) {
-            if (!nextTimeStep.cancel(false)) {
+            if (!nextTimeStep.isCancelled() && !nextTimeStep.cancel(false)) {
                 System.out.println("ERROR: Failed to cancel next time step!");
                 return;
             }
@@ -105,7 +105,7 @@ public abstract class TetrisGame {
 
     void checkMove() {
         if (placePlanned) {
-            if (!nextTimeStep.cancel(false)) {
+            if (!nextTimeStep.isCancelled() && !nextTimeStep.cancel(false)) {
                 System.out.println("ERROR: Failed to cancel next time step!");
                 return;
             }
@@ -116,7 +116,7 @@ public abstract class TetrisGame {
                 nextTimeStep = timer.schedule(this::placeBlock, PLACE_DELAY, TimeUnit.MILLISECONDS);
         } else {
             if (!blockQueue.getActive().canMoveDown()) {
-                if (!nextTimeStep.cancel(false)) {
+                if (!nextTimeStep.isCancelled() && !nextTimeStep.cancel(false)) {
                     System.out.println("ERROR: Failed to cancel next time step!");
                     return;
                 }
